@@ -21,12 +21,6 @@ class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio = new MezzioTestEnvironment($basePath);
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        unset($this->mezzio);
-    }
-
     public function testDispatch(): void
     {
         $result = $this->mezzio->dispatch('/');
