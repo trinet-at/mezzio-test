@@ -1,0 +1,20 @@
+build:
+  nodes:
+    default:
+      dependencies:
+        before:
+          - pecl install pcov
+      environment:
+        php:
+          version: "7.3"
+      tests:
+        override:
+          - 'composer check-deps'
+          - 'composer cs-check'
+          - 'composer psalm'
+          - 'composer phpstan'
+          - command: 'php -d pcov.enabled=1 vendor/bin/phpunit --coverage-clover=coverage'
+            coverage:
+              file: 'coverage'
+              format: 'php-clover'
+          - 'composer run --timeout=0 infection-xdebug'

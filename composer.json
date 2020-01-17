@@ -1,0 +1,64 @@
+{
+    "name": "trinet/mezzio-test",
+    "type": "library",
+    "description": "",
+    "license": "proprietary",
+    "require": {
+        "php": "^7.2",
+        "laminas/laminas-config-aggregator": "^1.2",
+        "laminas/laminas-diactoros": "^2.2",
+        "mezzio/mezzio": "^3.2",
+        "mezzio/mezzio-router": "^3.1",
+        "psr/container": "^1.0",
+        "psr/http-message": "^1.0",
+        "thecodingmachine/safe": "^0.1||^1.0"
+    },
+    "require-dev": {
+        "eventjet/coding-standard": "^3.1",
+        "fig/http-message-util": "^1.1",
+        "infection/infection": "dev-master",
+        "laminas/laminas-servicemanager": "^3.4",
+        "maglnet/composer-require-checker": "^2.0",
+        "mezzio/mezzio-fastroute": "^3.0",
+        "phpstan/extension-installer": "^1.0",
+        "phpstan/phpstan": "^0.12.5",
+        "phpstan/phpstan-phpunit": "^0.12.6",
+        "phpstan/phpstan-strict-rules": "^0.12.1",
+        "phpunit/phpunit": "^8.5",
+        "thecodingmachine/phpstan-safe-rule": "^0.1||^1.0",
+        "vimeo/psalm": "^3.8"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Trinet\\MezzioTest\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Trinet\\Test\\Functional\\MezzioTest\\": "tests/functional",
+            "Trinet\\Test\\Unit\\MezzioTest\\": "tests/unit"
+        }
+    },
+    "minimum-stability": "stable",
+    "scripts": {
+        "check": [
+            "@check-deps",
+            "@cs-check",
+            "@psalm",
+            "@phpstan",
+            "@phpunit",
+            "@infection"
+        ],
+        "check-deps": "vendor/bin/composer-require-checker",
+        "cs-check": "vendor/bin/phpcs",
+        "cs-fix": "vendor/bin/phpcbf",
+        "infection": "vendor/bin/infection --threads=4 --min-msi=87 --min-covered-msi=96",
+        "infection-xdebug": "@composer run --timeout=0 infection -- --initial-tests-php-options='-d zend_extension=xdebug.so'",
+        "phpstan": "vendor/bin/phpstan analyse",
+        "phpunit": "vendor/bin/phpunit",
+        "psalm": "vendor/bin/psalm"
+    }
+}

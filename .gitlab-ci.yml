@@ -1,0 +1,19 @@
+image: php:7.3
+
+cache:
+  paths:
+    - vendor/
+
+before_script:
+  - bash ci/docker_install.sh
+  - curl --silent --show-error https://getcomposer.org/installer | php
+  - php composer.phar install > /dev/null
+
+test:app:
+  script:
+    - php composer.phar cs-check
+    - php composer.phar check-deps
+    - php composer.phar phpstan
+    - php composer.phar psalm
+    - php -d zend_extension=xdebug.so ./vendor/bin/phpunit --coverage-text --colors=never
+    - php composer.phar run --timeout=0 infection-xdebug
