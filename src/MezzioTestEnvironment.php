@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Trinet\MezzioTest;
 
 use Laminas\Diactoros\ServerRequest;
+use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
 use Mezzio\Router\RouterInterface;
@@ -16,12 +17,12 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
+use Throwable;
 
 final class MezzioTestEnvironment
 {
     /** @var ContainerInterface */
     private $container;
-
     /** @var Application */
     private $app;
     /** @var string */
@@ -33,6 +34,8 @@ final class MezzioTestEnvironment
         $this->basePath = $basePath ?? Util::basePath();
         $this->basePath = Util::ensureTrailingSlash($this->basePath);
         \Safe\chdir($this->basePath);
+        $this->app();   // initialize App for routes to be populated
+        $this->registerErrorListener();
     }
 
     /**
@@ -69,8 +72,20 @@ final class MezzioTestEnvironment
 
     public function router(): RouterInterface
     {
-        $this->app();   // initialize App for routes to be populated
         return $this->container()->get(RouterInterface::class);
+    }
+
+    private function registerErrorListener(): void
+    {
+        if (!$this->container()->has(ErrorHandler::class)) {
+            return;
+        }
+        $errorHandler = $this->container()->get(ErrorHandler::class);
+        $errorHandler->attachListener(
+            static function (Throwable $error) {
+                throw $error;
+            }
+        );
     }
 
     private function app(): Application
