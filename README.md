@@ -26,9 +26,11 @@ registers a custom `\Laminas\Stratigility\Middleware\ErrorHandler` listener, whi
 any exception. Thus, the native exception assertions can be used (eg. `$this->expectException()` in PHPUnit).
 
 Currently, the Test environment offers three possibilities to dispatch a request:
-* `dispatch(UriInterface|string $uri, ?string $method = null): ResponseInterface`: dispatch any URI with the
-given method (defaults to `GET`)
-* `dispatchRoute(string $routeName, ?string $method = null): ResponseInterface`: dispatch a given named route
+* `dispatch(UriInterface|string $uri, ?string $method = null array $params = []): ResponseInterface`:
+dispatch any URI with the given method (defaults to `GET`). `$params` will be used as query parameters for `GET`
+and as parsed body for `POST` requests.
+* `dispatchRoute(string $routeName, array $routeParams = [], string $method = null, array $requestParams = []): ResponseInterface`:
+dispatch a given named route
 * `dispatchRequest(ServerRequestInterface $request): ResponseInterface`: dispatch a `ServerRequestInterface`
 
 If your base directory is not at the default location, a constructor parameter can be given to `MezzioTestEnvironment`.
@@ -36,16 +38,36 @@ If your base directory is not at the default location, a constructor parameter c
 The container and router can also be retrieved with `MezzioTestEnvironment->container()` and `->router()`, respectively.
 
 ### Configuration
-The `\Trinet\MezzioTest\TestConfigPostProcessor` can be used to load additional config files used for testing.
+The `\Trinet\MezzioTest\TestConfigProvider` can be used to load additional config files used for testing.
 It will look for `*testing.php`, `*testing.local.php`, `testing/*testing.php` and `testing/*testing.local.php`
 in the config directory, which defaults to `config/autoload/` in your project root, but can be configured
 to anything else.
 
-To use it, add the class to the array in the third parameter of the `ConfigAggregator` in your `config/config.php` file:
+To use it, call the loader when in testing mode in your `config/config.php` file to get an array of providers:
 ```php
-$aggregator = new ConfigAggregator([], $cacheStuff, [TestConfigPostProcessor::class]);
+$providers = [
+    \A\ConfigProvider::class,
+    \B\ConfigProvider::class,
+    // ...
+];
+
+if (getenv('APP_TESTING') !== false) {
+    $providers = array_merge($providers, \Trinet\MezzioTest\TestConfigProvider::load());
+}
+
+$aggregator = new ConfigAggregator($providers, null, []);
 ```
 or to use another config path:
 ```php
-$aggregator = new ConfigAggregator([], $cacheStuff, [new TestConfigPostProcessor('custom/config/path/')]);
+$providers = [
+    \A\ConfigProvider::class,
+    \B\ConfigProvider::class,
+    // ...
+];
+
+if (getenv('APP_TESTING') !== false) {
+    $providers = array_merge($providers, \Trinet\MezzioTest\TestConfigProvider::load('custom/path'));
+}
+
+$aggregator = new ConfigAggregator($providers, null, []);
 ```

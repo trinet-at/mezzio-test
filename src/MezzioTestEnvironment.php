@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Trinet\MezzioTest;
 
+use Fig\Http\Message\RequestMethodInterface;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
@@ -18,6 +19,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Throwable;
+
+use function count;
 
 final class MezzioTestEnvironment
 {
@@ -41,19 +44,31 @@ final class MezzioTestEnvironment
     /**
      * @param string|UriInterface $uri
      */
-    public function dispatch($uri, ?string $method = null): ResponseInterface
+    public function dispatch($uri, ?string $method = null, array $params = []): ResponseInterface
     {
+        if ($method === null) {
+            $method = RequestMethodInterface::METHOD_GET;
+        }
         $request = new ServerRequest([], [], $uri, $method);
+        if ($method === RequestMethodInterface::METHOD_GET && count($params) !== 0) {
+            $request = $request->withQueryParams($params);
+        }
+        if ($method === RequestMethodInterface::METHOD_POST && count($params) !== 0) {
+            $request = $request->withParsedBody($params);
+        }
         return $this->app()->handle($request);
     }
 
     public function dispatchRoute(
         string $routeName,
-        ?string $method = null
+        array $routeParams = [],
+        ?string $method = null,
+        array $requestParams = []
+
     ): ResponseInterface {
         $router = $this->router();
-        $route = $router->generateUri($routeName);
-        return $this->dispatch($route, $method);
+        $route = $router->generateUri($routeName, $routeParams);
+        return $this->dispatch($route, $method, $requestParams);
     }
 
     public function dispatchRequest(ServerRequestInterface $request): ResponseInterface
