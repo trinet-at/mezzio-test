@@ -1,3 +1,5 @@
+![Check Build](https://github.com/trinet-at/mezzio-test/workflows/Check%20Build/badge.svg)
+
 # mezzio-test
 
 `mezzio-test` provides classes and tools to help testing [mezzio](https://github.com/mezzio/mezzio) applications.
