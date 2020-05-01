@@ -1,0 +1,52 @@
+name: Check Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    container:
+      image: eventjet/checks-7.3:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare environment
+        run: |
+          mkdir -p /root/.ssh
+          ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
+
+      - name: Composer Cache
+        uses: actions/cache@v1
+        with:
+          path: $(composer config cache-files-dir)
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: |
+          composer install --no-progress --no-suggest --no-interaction > /dev/null
+
+      - name: Static analysis
+        run: |
+          composer check-deps
+          composer cs-check
+          composer phpstan -- --no-progress
+          composer psalm
+
+      - name: Tests
+        run: |
+          vendor/bin/phpunit --coverage-clover=coverage.xml --stop-on-failure
+          composer run --timeout=0 infection
+
+      - name: Monitor coverage
+        if: github.event_name == 'pull_request'
+        uses: slavcodev/coverage-monitor-action@1.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clover_file: "coverage.xml"
+          threshold_alert: 90
+          threshold_warning: 95

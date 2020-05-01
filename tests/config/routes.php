@@ -13,4 +13,11 @@ return static function (Application $app): void {
         },
         'home'
     );
+    $app->get(
+        '/error',
+        static function (): void {
+            throw new LogicException('I have an error');
+        },
+        'error'
+    );
 };

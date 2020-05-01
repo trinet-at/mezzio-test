@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Trinet\Test\Functional\MezzioTest;
 
+use Fig\Http\Message\RequestMethodInterface;
 use Fig\Http\Message\StatusCodeInterface;
+use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequest;
+use LogicException;
+use Mezzio\Application;
 use PHPUnit\Framework\TestCase;
 use Trinet\MezzioTest\MezzioTestEnvironment;
+use Trinet\Test\Functional\MezzioTest\TestDouble\RequestLoggerCallback;
 
 class MezzioTestEnvironmentTest extends TestCase
 {
@@ -63,5 +68,41 @@ class MezzioTestEnvironmentTest extends TestCase
         $config = $this->mezzio->container()->get('config');
 
         self::assertTrue($config['testing']);
+    }
+
+    public function testDispatchParamsArePassedToQueryForGetRequest(): void
+    {
+        $appMock = $this->createMock(Application::class);
+        $logger = new RequestLoggerCallback();
+        $appMock->method('handle')->willReturn(new Response())->willReturnCallback($logger);
+        ReflectionUtil::setReflectionProperty($this->mezzio, 'app', $appMock);
+
+        $params = ['foo' => 'bar'];
+        $this->mezzio->dispatch('/', null, $params);
+
+        $request = $logger->getRequest();
+        self::assertSame($request->getQueryParams(), $params);
+    }
+
+    public function testDispatchParamsArePassedToParsedBodyForPostRequest(): void
+    {
+        $appMock = $this->createMock(Application::class);
+        $logger = new RequestLoggerCallback();
+        $appMock->method('handle')->willReturn(new Response())->willReturnCallback($logger);
+        ReflectionUtil::setReflectionProperty($this->mezzio, 'app', $appMock);
+
+        $params = ['foo' => 'bar'];
+        $this->mezzio->dispatch('/', RequestMethodInterface::METHOD_POST, $params);
+
+        $request = $logger->getRequest();
+        self::assertSame($request->getParsedBody(), $params);
+    }
+
+    public function testCustomErrorHandlerRethrowsException(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('I have an error');
+
+        $this->mezzio->dispatch('/error');
     }
 }

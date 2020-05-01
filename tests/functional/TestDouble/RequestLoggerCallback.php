@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Trinet\Test\Functional\MezzioTest\TestDouble;
+
+use Laminas\Diactoros\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+final class RequestLoggerCallback
+{
+    /** @var ServerRequestInterface */
+    private $request;
+
+    public function __invoke(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->request = $request;
+        return new Response();
+    }
+
+    public function getRequest(): ServerRequestInterface
+    {
+        return $this->request;
+    }
+}

@@ -43,6 +43,7 @@ final class MezzioTestEnvironment
 
     /**
      * @param string|UriInterface $uri
+     * @param array<string, mixed> $params
      */
     public function dispatch($uri, ?string $method = null, array $params = []): ResponseInterface
     {
@@ -59,12 +60,15 @@ final class MezzioTestEnvironment
         return $this->app()->handle($request);
     }
 
+    /**
+     * @param array<string, mixed> $routeParams
+     * @param array<string, mixed> $requestParams
+     */
     public function dispatchRoute(
         string $routeName,
         array $routeParams = [],
         ?string $method = null,
         array $requestParams = []
-
     ): ResponseInterface {
         $router = $this->router();
         $route = $router->generateUri($routeName, $routeParams);
@@ -97,7 +101,7 @@ final class MezzioTestEnvironment
         }
         $errorHandler = $this->container()->get(ErrorHandler::class);
         $errorHandler->attachListener(
-            static function (Throwable $error) {
+            static function (Throwable $error): void {
                 throw $error;
             }
         );

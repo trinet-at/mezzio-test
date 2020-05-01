@@ -8,7 +8,7 @@ The package is not bound to any testing framework as it does not do any assertio
 the `Container` and `Application` based on your config file. Config file locations default to the
 [mezzio-skeleton](https://github.com/mezzio/mezzio-skeleton), but can be reconfigured.
 
-Also, a `TestConfigPostProcessor` is provided for injection custom testing configuration
+Also, a `TestConfigProvider` is provided for loading custom testing configuration
 (custom database, custom container configuration, ...).
 
 ## Usage

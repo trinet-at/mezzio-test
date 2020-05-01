@@ -1,3 +1,4 @@
+# unmaintained - GitHub actions are in use
 image: php:7.3
 
 cache:

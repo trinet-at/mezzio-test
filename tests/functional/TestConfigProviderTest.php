@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Trinet\Test\Functional\MezzioTest;
 
 use PHPUnit\Framework\TestCase;
-use ReflectionObject;
 use Trinet\MezzioTest\TestConfigProvider;
 
 class TestConfigProviderTest extends TestCase
@@ -37,19 +36,7 @@ class TestConfigProviderTest extends TestCase
         $providerA = $result[0];
         $providerB = $result[1];
         self::assertCount(2, $result);
-        self::assertStringContainsString($path, $this->getReflectionProperty($providerA, 'pattern'));
-        self::assertStringContainsString($path, $this->getReflectionProperty($providerB, 'pattern'));
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getReflectionProperty(object $object, string $property)
-    {
-        $reflectionProperty = (new ReflectionObject($object))->getProperty($property);
-        $reflectionProperty->setAccessible(true);
-        $value = $reflectionProperty->getValue($object);
-        $reflectionProperty->setAccessible(false);
-        return $value;
+        self::assertStringContainsString($path, ReflectionUtil::getReflectionProperty($providerA, 'pattern'));
+        self::assertStringContainsString($path, ReflectionUtil::getReflectionProperty($providerB, 'pattern'));
     }
 }
