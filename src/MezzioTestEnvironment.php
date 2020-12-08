@@ -24,9 +24,9 @@ use function count;
 
 final class MezzioTestEnvironment
 {
-    /** @var ContainerInterface */
+    /** @var ContainerInterface|null */
     private $container;
-    /** @var Application */
+    /** @var Application|null */
     private $app;
     /** @var string */
     private $basePath;
@@ -80,6 +80,9 @@ final class MezzioTestEnvironment
         return $this->app()->handle($request);
     }
 
+    /**
+     * @psalm-suppress UnresolvableInclude
+     */
     public function container(): ContainerInterface
     {
         if ($this->container !== null) {
@@ -107,6 +110,9 @@ final class MezzioTestEnvironment
         );
     }
 
+    /**
+     * @psalm-suppress UnresolvableInclude
+     */
     private function app(): Application
     {
         if ($this->app !== null) {

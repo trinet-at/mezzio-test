@@ -5,9 +5,16 @@ on: [push, pull_request]
 jobs:
   build:
 
+    strategy:
+      matrix:
+        php: ["7.4", "8.0"]
+
     runs-on: ubuntu-latest
     container:
-      image: eventjet/checks-7.3:latest
+      image: eventjet/checks-${{ matrix.php }}:latest
+
+    env:
+      COMPOSER_ARGS: ''
 
     steps:
       - name: Checkout
@@ -18,8 +25,12 @@ jobs:
           mkdir -p /root/.ssh
           ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
 
+      - name: Ignore Plaform Reqs if on PHP8
+        if: ${{ matrix.php == '8.0' }}
+        run: echo "COMPOSER_ARGS=--ignore-platform-reqs" >> $GITHUB_ENV
+
       - name: Composer Cache
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: $(composer config cache-files-dir)
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
@@ -28,7 +39,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer install --no-progress --no-suggest --no-interaction > /dev/null
+          composer install --no-progress --no-suggest --no-interaction ${{ env.COMPOSER_ARGS }} > /dev/null
 
       - name: Static analysis
         run: |
@@ -44,7 +55,7 @@ jobs:
 
       - name: Monitor coverage
         if: github.event_name == 'pull_request'
-        uses: slavcodev/coverage-monitor-action@1.0.1
+        uses: slavcodev/coverage-monitor-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clover_file: "coverage.xml"
