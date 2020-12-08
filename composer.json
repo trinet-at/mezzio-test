@@ -4,7 +4,7 @@
     "description": "Testing helpers for mezzio projects",
     "license": "MIT",
     "require": {
-        "php": "^7.3",
+        "php": "^7.3 || ^8.0",
         "fig/http-message-util": "^1.1",
         "laminas/laminas-config-aggregator": "^1.2",
         "laminas/laminas-diactoros": "^2.2",
@@ -13,11 +13,11 @@
         "mezzio/mezzio-router": "^3.1",
         "psr/container": "^1.0",
         "psr/http-message": "^1.0",
-        "thecodingmachine/safe": "^0.1 || ^1.0"
+        "thecodingmachine/safe": "^1.0"
     },
     "require-dev": {
         "eventjet/coding-standard": "^3.1",
-        "infection/infection": "^0.16",
+        "infection/infection": "^0.20",
         "laminas/laminas-servicemanager": "^3.4",
         "maglnet/composer-require-checker": "^2.0",
         "mezzio/mezzio-fastroute": "^3.0",
@@ -25,9 +25,10 @@
         "phpstan/phpstan": "^0.12.5",
         "phpstan/phpstan-phpunit": "^0.12.6",
         "phpstan/phpstan-strict-rules": "^0.12.1",
-        "phpunit/phpunit": "^9.0",
-        "thecodingmachine/phpstan-safe-rule": "^0.1 || ^1.0",
-        "vimeo/psalm": "^3.8"
+        "phpunit/phpunit": "^9.4",
+        "psalm/plugin-phpunit": "^0.13.0",
+        "thecodingmachine/phpstan-safe-rule": "^1.0",
+        "vimeo/psalm": "^4.0"
     },
     "config": {
         "sort-packages": true
@@ -56,7 +57,7 @@
         "check-deps": "vendor/bin/composer-require-checker",
         "cs-check": "vendor/bin/phpcs",
         "cs-fix": "vendor/bin/phpcbf",
-        "infection": "vendor/bin/infection --threads=4 --min-msi=86 --min-covered-msi=92",
+        "infection": "vendor/bin/infection --threads=4",
         "infection-xdebug": "@composer run --timeout=0 infection -- --initial-tests-php-options='-d zend_extension=xdebug.so'",
         "phpstan": "vendor/bin/phpstan analyse",
         "phpunit": "vendor/bin/phpunit",

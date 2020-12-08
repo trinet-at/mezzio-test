@@ -14,6 +14,8 @@ use PHPUnit\Framework\TestCase;
 use Trinet\MezzioTest\MezzioTestEnvironment;
 use Trinet\Test\Functional\MezzioTest\TestDouble\RequestLoggerCallback;
 
+use function dirname;
+
 class MezzioTestEnvironmentTest extends TestCase
 {
     /** @var MezzioTestEnvironment */

@@ -8,6 +8,8 @@ use PHPUnit\Framework\TestCase;
 use Trinet\MezzioTest\Util;
 use UnexpectedValueException;
 
+use function dirname;
+
 class UtilTest extends TestCase
 {
     public function testBasePath(): void

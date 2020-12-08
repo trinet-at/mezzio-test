@@ -7,6 +7,7 @@ namespace Trinet\MezzioTest;
 use RuntimeException;
 use UnexpectedValueException;
 
+use function dirname;
 use function file_exists;
 use function strlen;
 use function trim;

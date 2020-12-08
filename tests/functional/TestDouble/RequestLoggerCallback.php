@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Trinet\Test\Functional\MezzioTest\TestDouble;
 
 use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class RequestLoggerCallback
 {
-    /** @var ServerRequestInterface */
+    /** @var ServerRequestInterface|null */
     private $request;
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -21,6 +22,6 @@ final class RequestLoggerCallback
 
     public function getRequest(): ServerRequestInterface
     {
-        return $this->request;
+        return $this->request ?? new ServerRequest();
     }
 }
