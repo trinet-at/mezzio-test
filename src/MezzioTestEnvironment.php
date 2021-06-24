@@ -24,12 +24,9 @@ use function count;
 
 final class MezzioTestEnvironment
 {
-    /** @var ContainerInterface|null */
-    private $container;
-    /** @var Application|null */
-    private $app;
-    /** @var string */
-    private $basePath;
+    private ?ContainerInterface $container = null;
+    private ?Application $app = null;
+    private string $basePath;
 
     public function __construct(?string $basePath = null)
     {
@@ -100,7 +97,7 @@ final class MezzioTestEnvironment
     private function registerErrorListener(): void
     {
         if (!$this->container()->has(ErrorHandler::class)) {
-            return;
+            return; // @codeCoverageIgnore
         }
         $errorHandler = $this->container()->get(ErrorHandler::class);
         $errorHandler->attachListener(

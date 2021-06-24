@@ -11,7 +11,7 @@ use function getenv;
 final class TestConfigProvider
 {
     /**
-     * @return mixed[]
+     * @return list<mixed>
      */
     public static function load(?string $configDir = null): array
     {

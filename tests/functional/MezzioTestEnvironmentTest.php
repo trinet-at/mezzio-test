@@ -18,8 +18,7 @@ use function dirname;
 
 class MezzioTestEnvironmentTest extends TestCase
 {
-    /** @var MezzioTestEnvironment */
-    private $mezzio;
+    private MezzioTestEnvironment $mezzio;
 
     protected function setUp(): void
     {

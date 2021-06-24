@@ -11,8 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class RequestLoggerCallback
 {
-    /** @var ServerRequestInterface|null */
-    private $request;
+    private ?ServerRequestInterface $request = null;
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
