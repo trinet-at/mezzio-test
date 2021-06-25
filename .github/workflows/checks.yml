@@ -1,6 +1,6 @@
 name: Check Build
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   build:
@@ -13,9 +13,6 @@ jobs:
     container:
       image: eventjet/checks-${{ matrix.php }}:latest
 
-    env:
-      COMPOSER_ARGS: ''
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,27 +21,28 @@ jobs:
         run: |
           mkdir -p /root/.ssh
           ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
-
-      - name: Ignore Plaform Reqs if on PHP8
-        if: ${{ matrix.php == '8.0' }}
-        run: echo "COMPOSER_ARGS=--ignore-platform-reqs" >> $GITHUB_ENV
+          echo "COMPOSER_CACHE=$(composer config cache-dir)" >> $GITHUB_ENV
 
       - name: Composer Cache
         uses: actions/cache@v2
         with:
-          path: $(composer config cache-files-dir)
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          path: |
+            ${{ env.COMPOSER_CACHE }}
+            vendor
+          key: ${{ runner.os }}-composer
 
       - name: Install dependencies
         run: |
-          composer install --no-progress --no-suggest --no-interaction ${{ env.COMPOSER_ARGS }} > /dev/null
+          composer update --no-progress --no-interaction ${{ matrix.composer_args }} > /dev/null
+
+      - name: PHPCS
+        if: matrix.php != '8.0'
+        run: |
+          composer cs-check
 
       - name: Static analysis
         run: |
           composer check-deps
-          composer cs-check
           composer phpstan -- --no-progress
           composer psalm
 
@@ -59,5 +57,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clover_file: "coverage.xml"
-          threshold_alert: 90
-          threshold_warning: 95
+          comment_context: PHP ${{ matrix.php }}
+          threshold_alert: 100
+          threshold_warning: 100

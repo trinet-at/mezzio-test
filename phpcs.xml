@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <ruleset>
-    <rule ref="EventjetStrict">
-        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint"/>
-    </rule>
+    <rule ref="EventjetStrict"/>
+
+    <arg name="parallel" value="80"/>
+
     <file>src</file>
     <file>tests</file>
 </ruleset>
