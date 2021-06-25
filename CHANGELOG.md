@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 File automatically generated with [phly/keep-a-changelog](https://github.com/phly/keep-a-changelog)
 
-## 1.0.0 - TBD
+## 1.0.0 - 2021-06-25
 
 There are no BC breaks from the previous version. This package was already used enough to tag it as stable 🙂
 
