@@ -41,9 +41,14 @@ final class MezzioTestEnvironment
     /**
      * @param string|UriInterface $uri
      * @param array<string, mixed> $params
+     * @param array<string, string> $headers
      */
-    public function dispatch($uri, ?string $method = null, array $params = []): ResponseInterface
-    {
+    public function dispatch(
+        $uri,
+        ?string $method = null,
+        array $params = [],
+        array $headers = []
+    ): ResponseInterface {
         if ($method === null) {
             $method = RequestMethodInterface::METHOD_GET;
         }
@@ -54,22 +59,29 @@ final class MezzioTestEnvironment
         if ($method === RequestMethodInterface::METHOD_POST && count($params) !== 0) {
             $request = $request->withParsedBody($params);
         }
+
+        foreach ($headers as $header => $value) {
+            $request = $request->withHeader($header, $value);
+        }
+
         return $this->app()->handle($request);
     }
 
     /**
      * @param array<string, mixed> $routeParams
      * @param array<string, mixed> $requestParams
+     * @param array<string, string> $headers
      */
     public function dispatchRoute(
         string $routeName,
         array $routeParams = [],
         ?string $method = null,
-        array $requestParams = []
+        array $requestParams = [],
+        array $headers = []
     ): ResponseInterface {
         $router = $this->router();
         $route = $router->generateUri($routeName, $routeParams);
-        return $this->dispatch($route, $method, $requestParams);
+        return $this->dispatch($route, $method, $requestParams, $headers);
     }
 
     public function dispatchRequest(ServerRequestInterface $request): ResponseInterface
