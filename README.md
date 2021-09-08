@@ -28,10 +28,10 @@ registers a custom `\Laminas\Stratigility\Middleware\ErrorHandler` listener, whi
 any exception. Thus, the native exception assertions can be used (eg. `$this->expectException()` in PHPUnit).
 
 Currently, the Test environment offers three possibilities to dispatch a request:
-* `dispatch(UriInterface|string $uri, ?string $method = null array $params = []): ResponseInterface`:
+* `dispatch(UriInterface|string $uri, ?string $method = null, array $params = [], array $headers = []): ResponseInterface`:
 dispatch any URI with the given method (defaults to `GET`). `$params` will be used as query parameters for `GET`
 and as parsed body for `POST` requests.
-* `dispatchRoute(string $routeName, array $routeParams = [], string $method = null, array $requestParams = []): ResponseInterface`:
+* `dispatchRoute(string $routeName, array $routeParams = [], string $method = null, array $requestParams = [], array $headers = []): ResponseInterface`:
 dispatch a given named route
 * `dispatchRequest(ServerRequestInterface $request): ResponseInterface`: dispatch a `ServerRequestInterface`
 
