@@ -99,6 +99,26 @@ class MezzioTestEnvironmentTest extends TestCase
         self::assertSame($request->getParsedBody(), $params);
     }
 
+    public function testDispatchHeadersArePassedToRequest(): void
+    {
+        $appMock = $this->createMock(Application::class);
+        $logger = new RequestLoggerCallback();
+        $appMock->method('handle')->willReturn(new Response())->willReturnCallback($logger);
+        ReflectionUtil::setReflectionProperty($this->mezzio, 'app', $appMock);
+
+        $headers = ['foo' => 'bar'];
+        $this->mezzio->dispatch('/', RequestMethodInterface::METHOD_POST, [], $headers);
+
+        $expected = [
+            'foo' => [
+                'bar'
+            ],
+        ];
+
+        $request = $logger->getRequest();
+        self::assertSame($request->getHeaders(), $expected);
+    }
+
     public function testCustomErrorHandlerRethrowsException(): void
     {
         $this->expectException(LogicException::class);
