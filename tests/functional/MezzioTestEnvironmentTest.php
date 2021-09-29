@@ -111,7 +111,7 @@ class MezzioTestEnvironmentTest extends TestCase
 
         $expected = [
             'foo' => [
-                'bar'
+                'bar',
             ],
         ];
 
