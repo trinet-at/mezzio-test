@@ -55,7 +55,7 @@
             "@infection"
         ],
         "check-deps": "vendor/bin/composer-require-checker",
-        "cs-check": "vendor/bin/phpcs",
+        "cs-check": "vendor/bin/phpcs --config-set php_version 70423",
         "cs-fix": "vendor/bin/phpcbf",
         "infection": "vendor/bin/infection --threads=4",
         "infection-xdebug": "@composer run --timeout=0 infection -- --initial-tests-php-options='-d zend_extension=xdebug.so'",
