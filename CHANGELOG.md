@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file, in reverse 
 
 File automatically generated with [phly/keep-a-changelog](https://github.com/phly/keep-a-changelog)
 
+## 1.1.0 - 2021-09-29
+
+### Added
+
+- [#3](https://github.com/trinet-at/mezzio-test/pull/3) adds the possibility to pass additional headers to dispatch methods
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
 ## 1.0.0 - 2021-06-25
 
 There are no BC breaks from the previous version. This package was already used enough to tag it as stable 🙂
