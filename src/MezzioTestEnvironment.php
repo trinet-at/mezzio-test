@@ -53,11 +53,15 @@ final class MezzioTestEnvironment
             $method = RequestMethodInterface::METHOD_GET;
         }
         $request = new ServerRequest([], [], $uri, $method);
-        if ($method === RequestMethodInterface::METHOD_GET && count($params) !== 0) {
-            $request = $request->withQueryParams($params);
-        }
-        if ($method === RequestMethodInterface::METHOD_POST && count($params) !== 0) {
-            $request = $request->withParsedBody($params);
+
+        if (count($params) !== 0) {
+            switch ($method) {
+                case RequestMethodInterface::METHOD_GET:
+                    $request = $request->withQueryParams($params);
+                    break;
+                default:
+                    $request = $request->withParsedBody($params);
+            }
         }
 
         foreach ($headers as $header => $value) {
