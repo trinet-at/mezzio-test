@@ -4,11 +4,34 @@ All notable changes to this project will be documented in this file, in reverse 
 
 File automatically generated with [phly/keep-a-changelog](https://github.com/phly/keep-a-changelog)
 
+## 1.1.1 - 2021-10-15
+
+### Added
+
+- [#5](https://github.com/trinet-at/mezzio-test/pull/5) adds support for PATCH and PUT verbs in requests
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
 ## 1.1.0 - 2021-09-29
 
 ### Added
 
-- [#3](https://github.com/trinet-at/mezzio-test/pull/3) adds the possibility to pass additional headers to dispatch methods
+- [#3](https://github.com/trinet-at/mezzio-test/pull/3) adds the possibility to pass additional headers to dispatch
+  methods
 
 ### Changed
 
