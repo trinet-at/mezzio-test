@@ -66,6 +66,7 @@ class MezzioTestEnvironmentTest extends TestCase
 
     public function testRuntimeIsSetToAppTesting(): void
     {
+        /** @var array<string, mixed> $config */
         $config = $this->mezzio->container()->get('config');
 
         self::assertTrue($config['testing']);

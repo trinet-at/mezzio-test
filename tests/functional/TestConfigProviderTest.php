@@ -36,7 +36,11 @@ class TestConfigProviderTest extends TestCase
         $providerA = $result[0];
         $providerB = $result[1];
         self::assertCount(2, $result);
-        self::assertStringContainsString($path, ReflectionUtil::getReflectionProperty($providerA, 'pattern'));
-        self::assertStringContainsString($path, ReflectionUtil::getReflectionProperty($providerB, 'pattern'));
+        $propertyA = ReflectionUtil::getReflectionProperty($providerA, 'pattern');
+        self::assertIsString($propertyA);
+        self::assertStringContainsString($path, $propertyA);
+        $propertyB = ReflectionUtil::getReflectionProperty($providerB, 'pattern');
+        self::assertIsString($propertyB);
+        self::assertStringContainsString($path, $propertyB);
     }
 }
