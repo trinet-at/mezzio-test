@@ -7,7 +7,10 @@ jobs:
 
     strategy:
       matrix:
-        php: ["7.4", "8.0"]
+        php: ["7.4", "8.0", "8.1"]
+        composer_args:
+          - '--prefer-lowest'
+          - ''
 
     runs-on: ubuntu-latest
     container:
@@ -22,6 +25,8 @@ jobs:
           mkdir -p /root/.ssh
           ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
           echo "COMPOSER_CACHE=$(composer config cache-dir)" >> $GITHUB_ENV
+          git fetch origin $GITHUB_BASE_REF $GITHUB_HEAD_REF
+          echo "GIT_ADDED_FILES="$(git diff --name-only --diff-filter=A origin/$GITHUB_BASE_REF origin/$GITHUB_HEAD_REF | grep 'src\/')"" >> $GITHUB_ENV
 
       - name: Composer Cache
         uses: actions/cache@v2
@@ -35,21 +40,34 @@ jobs:
         run: |
           composer update --no-progress --no-interaction ${{ matrix.composer_args }} > /dev/null
 
-      - name: PHPCS
-        if: matrix.php != '8.0'
-        run: |
-          composer cs-check
-
       - name: Static analysis
         run: |
           composer check-deps
+          composer cs-check
           composer phpstan -- --no-progress
           composer psalm
+
+      - name: Infection coverage of added files
+        if: env.GIT_ADDED_FILES != '' && !contains(github.event.pull_request.labels.*.name, 'skip-infection-diff')
+        run: |
+          vendor/bin/infection \
+            --git-diff-base=origin/$GITHUB_BASE_REF \
+            --git-diff-filter=A \
+            --logger-github \
+            --min-msi=100 \
+            --min-covered-msi=100
 
       - name: Tests
         run: |
           vendor/bin/phpunit --coverage-clover=coverage.xml --stop-on-failure
           composer run --timeout=0 infection
+
+      - name: Save Infection result
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: infection-log-${{ matrix.php }}.txt
+          path: infection-log.txt
 
       - name: Monitor coverage
         if: github.event_name == 'pull_request'
@@ -57,6 +75,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clover_file: "coverage.xml"
-          comment_context: PHP ${{ matrix.php }}
+          comment: false
+          comment_context: Coverage PHP ${{ matrix.php }}
+          status_context: Coverage PHP ${{ matrix.php }}
           threshold_alert: 100
           threshold_warning: 100

@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file, in reverse 
 
 File automatically generated with [phly/keep-a-changelog](https://github.com/phly/keep-a-changelog)
 
+## 1.1.2 - 2022-02-25
+
+### Added
+
+- [#6](https://github.com/trinet-at/mezzio-test/pull/6) allows using v2 of thecodingmachine/safe
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
 ## 1.1.1 - 2021-10-15
 
 ### Added
