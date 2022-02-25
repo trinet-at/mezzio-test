@@ -3,6 +3,7 @@
     <rule ref="EventjetStrict"/>
 
     <arg name="parallel" value="80"/>
+    <config name="php_version" value="70400"/>
 
     <file>src</file>
     <file>tests</file>

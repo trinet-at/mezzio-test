@@ -1,8 +1,8 @@
 {
     "name": "trinet/mezzio-test",
-    "type": "library",
     "description": "Testing helpers for mezzio projects",
     "license": "MIT",
+    "type": "library",
     "require": {
         "php": "^7.4 || ^8.0",
         "fig/http-message-util": "^1.1",
@@ -13,26 +13,24 @@
         "mezzio/mezzio-router": "^3.1",
         "psr/container": "^1.0 || ^2.0",
         "psr/http-message": "^1.0",
-        "thecodingmachine/safe": "^1.0"
+        "thecodingmachine/safe": "^1.0 || ^2.0"
     },
     "require-dev": {
         "eventjet/coding-standard": "^3.1",
-        "infection/infection": "^0.23.0",
+        "infection/infection": "^0.26.0",
         "laminas/laminas-servicemanager": "^3.4",
-        "maglnet/composer-require-checker": "^3.3",
+        "maglnet/composer-require-checker": "^3.3 || ^4.0",
         "mezzio/mezzio-fastroute": "^3.0",
         "phpstan/extension-installer": "^1.0",
-        "phpstan/phpstan": "^0.12.5",
-        "phpstan/phpstan-phpunit": "^0.12.6",
-        "phpstan/phpstan-strict-rules": "^0.12.1",
-        "phpunit/phpunit": "^9.4",
+        "phpstan/phpstan": "^1.4",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "phpstan/phpstan-strict-rules": "^1.0",
+        "phpunit/phpunit": "^9.5",
         "psalm/plugin-phpunit": "^0.16.1",
         "thecodingmachine/phpstan-safe-rule": "^1.0",
         "vimeo/psalm": "^4.0"
     },
-    "config": {
-        "sort-packages": true
-    },
+    "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
             "Trinet\\MezzioTest\\": "src"
@@ -44,7 +42,15 @@
             "Trinet\\Test\\Unit\\MezzioTest\\": "tests/unit"
         }
     },
-    "minimum-stability": "stable",
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "phpstan/extension-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "infection/extension-installer": true
+        },
+        "sort-packages": true
+    },
     "scripts": {
         "check": [
             "@check-deps",
