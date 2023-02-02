@@ -14,6 +14,33 @@ use Psr\Http\Message\UriInterface;
 trait RequestsTrait
 {
     /**
+     * Visit the given URI with a DELETE request.
+     *
+     * @param array<string,string>                      $parsedBody
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function delete(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                method: RequestMethodInterface::METHOD_DELETE,
+                uri: $uri,
+                parsedBody: $parsedBody,
+                headers: $headers,
+                cookieParams: $cookieParams,
+                serverParams: $serverParams
+            )
+        );
+    }
+
+    /**
      * Visit the given URI with a GET request.
      *
      * @param array<string, mixed>                        $queryParams
