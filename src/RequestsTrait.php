@@ -205,6 +205,35 @@ trait RequestsTrait
     /**
      * Visit the given URI with a PATCH request.
      *
+     * @param array<string,string>                      $parsedBody
+     * @param array<UploadedFileInterface>              $uploadedFiles
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function patch(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        string $body = 'php://input',
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                method: RequestMethodInterface::METHOD_PATCH,
+                uri: $uri,
+                parsedBody: $parsedBody,
+                uploadedFiles: $uploadedFiles,
+                body: $body,
+                headers: $headers,
+                cookieParams: $cookieParams,
+                serverParams: $serverParams
+            )
+        );
+    }
+
      * @param array<string, string>                $parsedBody
      * @param array<UploadedFileInterface>         $uploadedFiles
      * @param array<string, array<string, string>> $headers
