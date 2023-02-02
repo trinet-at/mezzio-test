@@ -14,6 +14,33 @@ use Psr\Http\Message\UriInterface;
 trait RequestsTrait
 {
     /**
+     * Visit the given URI with a GET request.
+     *
+     * @param array<string, mixed>                        $queryParams
+     * @param array<string, array<string, string>|string> $headers
+     * @param array<string, string>                       $cookieParams
+     * @param array<string, string>                       $serverParams
+     */
+    public function get(
+        UriInterface|string $uri,
+        array $queryParams = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                method: RequestMethodInterface::METHOD_GET,
+                uri: $uri,
+                queryParams: $queryParams,
+                headers: $headers,
+                cookieParams: $cookieParams,
+                serverParams: $serverParams
+            )
+        );
+    }
+
+    /**
      * Visit the given URI with a PATCH request.
      *
      * @param array<string, string>                $parsedBody
@@ -21,7 +48,6 @@ trait RequestsTrait
      * @param array<string, array<string, string>> $headers
      * @param array<string, string>                $cookieParams
      * @param array<string, string>                $serverParams
-     *
      */
     public function patch(
         UriInterface|string $uri,
@@ -54,7 +80,6 @@ trait RequestsTrait
      * @param array<string, array<string, string>> $headers
      * @param array<string, string>                $cookieParams
      * @param array<string, string>                $serverParams
-     *
      */
     public function post(
         UriInterface|string $uri,
@@ -88,7 +113,6 @@ trait RequestsTrait
      * @param array<string, array<string, string>|string> $headers
      * @param array<string, string>                       $cookieParams
      * @param array<string, string>                       $serverParams
-     *
      */
     public function request(
         string $method,
@@ -113,34 +137,6 @@ trait RequestsTrait
             $queryParams,
             $parsedBody,
             $protocol
-        );
-    }
-
-    /**
-     * Visit the given URI with a GET request.
-     *
-     * @param array<string, mixed>                        $queryParams
-     * @param array<string, array<string, string>|string> $headers
-     * @param array<string, string>                       $cookieParams
-     * @param array<string, string>                       $serverParams
-     *
-     */
-    public function get(
-        UriInterface|string $uri,
-        array $queryParams = [],
-        array $headers = [],
-        array $cookieParams = [],
-        array $serverParams = [],
-    ): ResponseInterface {
-        return $this->dispatchRequest(
-            $this->request(
-                method: RequestMethodInterface::METHOD_GET,
-                uri: $uri,
-                queryParams: $queryParams,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
-            )
         );
     }
 }

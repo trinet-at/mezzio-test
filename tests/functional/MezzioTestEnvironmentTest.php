@@ -34,20 +34,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio = new MezzioTestEnvironment($basePath);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testCustomErrorHandlerRethrowsException(): void
     {
         $this->expectException(LogicException::class);
@@ -56,25 +42,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio->get('/error');
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseBody
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseHeaders
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseReasonPhrase
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseStatusCode
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testDispatch(): void
     {
         $result = $this->mezzio->dispatch('/');
@@ -89,26 +56,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         self::assertSame('Hi', (string)$result->getBody());
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertResponseBodyContainsString
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameRouteMiddlewareOrResponseHandler
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameMatchedRouteName
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseBody
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseStatusCode
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::generateUri
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testDispatchGeneratedRoute(): void
     {
         $route = $this->mezzio->generateUri('home');
@@ -122,23 +69,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio->assertSameResponseStatusCode(StatusCodeInterface::STATUS_OK);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameRequestHeaders
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseBody
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseStatusCode
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testDispatchHeadersArePassedToRequest(): void
     {
         $headers = [
@@ -155,24 +85,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio->assertSameResponseBody('Hi');
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameRouteMiddlewareOrResponseHandler
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameMatchedRouteName
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameRequestParsedBody
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseBody
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::post
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testDispatchParamsArePassedToParsedBodyForPostRequest(): void
     {
         $params = [
@@ -186,21 +98,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio->assertSameResponseBody(json_encode($params));
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameRequestQueryParams
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testDispatchParamsArePassedToQueryForGetRequest(): void
     {
         $params = [
@@ -211,18 +108,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio->assertSameRequestQueryParams($params);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testDispatchRequest(): void
     {
         $request = new ServerRequest([], [], '/');
@@ -233,21 +118,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         self::assertSame(StatusCodeInterface::STATUS_OK, $result->getStatusCode());
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRoute
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::generateUri
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testDispatchRoute(): void
     {
         $result = $this->mezzio->dispatchRoute('404');
@@ -257,24 +127,9 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio->assertSameRouteMiddlewareOrResponseHandler(NotFoundHandler::class);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::RequirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameMatchedRouteName
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::router
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testDispatchRouter(): void
     {
-        $router = $this->mezzio->router();
+        $router = $this->mezzio->getRouter();
 
         $request = $this->mezzio->request('GET', '/');
         self::assertSame('home', $router->match($request)->getMatchedRouteName());
@@ -283,20 +138,10 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio->assertSameMatchedRouteName('home');
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::__construct
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testRuntimeIsSetToAppTesting(): void
     {
         /** @var array<string, mixed> $config */
-        $config = $this->mezzio->container()
+        $config = $this->mezzio->getContainer()
             ->get('config');
 
         self::assertTrue($config['testing']);

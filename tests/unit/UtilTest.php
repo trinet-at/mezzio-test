@@ -19,10 +19,6 @@ use function dirname;
  */
 final class UtilTest extends TestCase
 {
-    /**
-     * @covers \Trinet\MezzioTest\Util::basePath
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testBasePath(): void
     {
         $result = Util::basePath();
@@ -30,9 +26,6 @@ final class UtilTest extends TestCase
         self::assertSame(Util::ensureTrailingSlash(dirname(__DIR__, 2)), $result);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testEnsureTrailingSlash(): void
     {
         $path = 'foo/bar';
@@ -42,9 +35,6 @@ final class UtilTest extends TestCase
         self::assertSame($path . '/', $result);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testEnsureTrailingSlashBailsEarlyIfGivenPathAlreadyHasATrailingSlash(): void
     {
         $path = 'foo/bar/';
@@ -54,9 +44,6 @@ final class UtilTest extends TestCase
         self::assertSame($path, $result);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testEnsureTrailingSlashThrowsExceptionIfEmptyStringIsGiven(): void
     {
         $this->expectException(UnexpectedValueException::class);
@@ -65,9 +52,6 @@ final class UtilTest extends TestCase
         Util::ensureTrailingSlash('');
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     */
     public function testEnsureTrailingSlashThrowsExceptionIfEmptyStringWithWithespaceIsGiven(): void
     {
         $this->expectException(UnexpectedValueException::class);

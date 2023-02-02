@@ -16,13 +16,6 @@ use Trinet\MezzioTest\TestConfigProvider;
  */
 final class TestConfigProviderTest extends TestCase
 {
-    /**
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     * @covers \Trinet\MezzioTest\Util::basePath
-     */
     public function testAdditionalFileProvidersAreReturnedWhenTesting(): void
     {
         \Safe\putenv('APP_TESTING=true');
@@ -32,12 +25,6 @@ final class TestConfigProviderTest extends TestCase
         self::assertCount(2, $result);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     */
     public function testCustomConfigPath(): void
     {
         \Safe\putenv('APP_TESTING=true');
@@ -55,11 +42,6 @@ final class TestConfigProviderTest extends TestCase
         self::assertStringContainsString($path, $propertyB);
     }
 
-    /**
-     * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
-     * @covers \Trinet\MezzioTest\TestConfigProvider::load
-     * @covers \Trinet\MezzioTest\TestConfigProvider::prepareConfigDir
-     */
     public function testReturnsEmptyArrayWhenNotInTestingEnvironment(): void
     {
         \Safe\putenv('APP_TESTING');

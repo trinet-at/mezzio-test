@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Trinet\Test\Functional\MezzioTest;
 
-use ReflectionException;
 use ReflectionObject;
 
 final class ReflectionUtil
@@ -23,8 +22,6 @@ final class ReflectionUtil
 
     /**
      * @param mixed $value
-     *
-     * @throws ReflectionException
      */
     public static function setReflectionProperty(object $object, string $property, $value): void
     {

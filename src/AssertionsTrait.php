@@ -18,6 +18,12 @@ use function sprintf;
 
 trait AssertionsTrait
 {
+    public function assertResponseBodyContainsString(string $string): void
+    {
+        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
+        Assert::assertStringContainsString($string, (string)$this->response->getBody());
+    }
+
     public function assertSameMatchedRouteName(string $routeName): void
     {
         Assert::assertInstanceOf(RouteResult::class, $this->routeResult);
@@ -25,8 +31,40 @@ trait AssertionsTrait
     }
 
     /**
-     * @param array<string|array<string>> $headers
-     * @return void
+     * @param array<array<string>|string> $headers
+     */
+    public function assertSameRequestHeaders(array $headers): void
+    {
+        Assert::assertInstanceOf(RequestInterface::class, $this->request);
+        Assert::assertSame($headers, $this->request->getHeaders());
+    }
+
+    /**
+     * @param array<string,mixed> $parsedBody
+     */
+    public function assertSameRequestParsedBody(array $parsedBody): void
+    {
+        Assert::assertInstanceOf(RequestInterface::class, $this->request);
+        Assert::assertSame($parsedBody, $this->request->getParsedBody());
+    }
+
+    /**
+     * @param array<string,mixed> $queryParams
+     */
+    public function assertSameRequestQueryParams(array $queryParams): void
+    {
+        Assert::assertInstanceOf(RequestInterface::class, $this->request);
+        Assert::assertSame($queryParams, $this->request->getQueryParams());
+    }
+
+    public function assertSameResponseBody(string $content): void
+    {
+        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
+        Assert::assertSame($content, (string)$this->response->getBody());
+    }
+
+    /**
+     * @param array<array<string>|string> $headers
      */
     public function assertSameResponseHeaders(array $headers): void
     {
@@ -34,20 +72,16 @@ trait AssertionsTrait
         Assert::assertSame($headers, $this->response->getHeaders());
     }
 
+    public function assertSameResponseReasonPhrase(string $reasonPhrase): void
+    {
+        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
+        Assert::assertSame($reasonPhrase, $this->response->getReasonPhrase());
+    }
+
     public function assertSameResponseStatusCode(int $statusCode): void
     {
         Assert::assertInstanceOf(ResponseInterface::class, $this->response);
         Assert::assertSame($statusCode, $this->response->getStatusCode());
-    }
-
-    /**
-     * @param array<string|array<string>> $headers
-     * @return void
-     */
-    public function assertSameRequestHeaders(array $headers): void
-    {
-        Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame($headers, $this->request->getHeaders());
     }
 
     public function assertSameRouteMiddlewareOrResponseHandler(string $middlewareOrResponseHandlerClass): void
@@ -60,7 +94,9 @@ trait AssertionsTrait
 
         /** @var class-string $matchedMiddlewareOrResponseHandlerName */
         $matchedMiddlewareOrResponseHandlerName = match (true) {
-            ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) => (new ReflectionClass($matchedMiddlewareOrResponseHandler))
+            ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) => (new ReflectionClass(
+                $matchedMiddlewareOrResponseHandler
+            ))
                 ->getProperty('middlewareName')
                 ->getValue($matchedMiddlewareOrResponseHandler),
             default => $matchedMiddlewareOrResponseHandler::class
@@ -79,43 +115,5 @@ trait AssertionsTrait
                 RequestHandlerInterface::class
             )
         );
-    }
-
-    /**
-     * @param array<string,mixed> $parsedBody
-     * @return void
-     */
-    public function assertSameRequestParsedBody(array $parsedBody): void
-    {
-        Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame($parsedBody, $this->request->getParsedBody());
-    }
-
-    /**
-     * @param array<string,mixed> $queryParams
-     * @return void
-     */
-    public function assertSameRequestQueryParams(array $queryParams): void
-    {
-        Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame($queryParams, $this->request->getQueryParams());
-    }
-
-    public function assertSameResponseReasonPhrase(string $reasonPhrase): void
-    {
-        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
-        Assert::assertSame($reasonPhrase, $this->response->getReasonPhrase());
-    }
-
-    public function assertResponseBodyContainsString(string $string): void
-    {
-        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
-        Assert::assertStringContainsString($string, (string)$this->response->getBody());
-    }
-
-    public function assertSameResponseBody(string $content): void
-    {
-        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
-        Assert::assertSame($content, (string)$this->response->getBody());
     }
 }

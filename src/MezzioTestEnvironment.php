@@ -12,9 +12,7 @@ use Mezzio\MiddlewareFactory;
 use Mezzio\Router\RouteResult;
 use Mezzio\Router\RouterInterface;
 use PHPUnit\Framework\Assert;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
@@ -42,7 +40,6 @@ final class MezzioTestEnvironment extends Assert
     private ?RouteResult $routeResult = null;
 
     /**
-     * @param string|null $basePath
      * @psalm-suppress PossiblyInvalidFunctionCall
      */
     public function __construct(?string $basePath = null)
@@ -67,7 +64,7 @@ final class MezzioTestEnvironment extends Assert
         ($this->requireClosure('routes.php'))($this->application, $middlewareFactory, $this->container);
 
         // Attach an ErrorListener to the ErrorHandler
-        if (!$this->container->has(ErrorHandler::class)) {
+        if (! $this->container->has(ErrorHandler::class)) {
             return;
         }
 
@@ -75,36 +72,9 @@ final class MezzioTestEnvironment extends Assert
             ->attachListener(static fn (Throwable $error) => throw $error);
     }
 
-    public function application(): Application
-    {
-        return $this->application;
-    }
-
-    public function container(): ContainerInterface
-    {
-        return $this->container;
-    }
-
-    private function requireContainer(): ContainerInterface
-    {
-        $result = $this->requirePath('container.php');
-        assert($result instanceof ContainerInterface);
-        return $result;
-    }
-
-    private function requireClosure(string $path): Closure
-    {
-        $result = $this->requirePath($path);
-        assert($result instanceof Closure);
-        return $result;
-    }
-
     /**
-     * @param UriInterface|string $uri
-     * @param string $method
-     * @param array<string,string> $params
-     * @param array<string|array<string>> $headers
-     * @return ResponseInterface
+     * @param array<string,string>        $params
+     * @param array<array<string>|string> $headers
      */
     public function dispatch(
         UriInterface|string $uri,
@@ -116,7 +86,7 @@ final class MezzioTestEnvironment extends Assert
         $withParsedBody = $method !== RequestMethodInterface::METHOD_GET ? $params : [];
 
         $request = $this->request(
-            method:$method,
+            method: $method,
             uri: $uri,
             queryParams: $withQueryParams,
             parsedBody: $withParsedBody,
@@ -153,16 +123,43 @@ final class MezzioTestEnvironment extends Assert
 
     /**
      * Generate a URI from the named route.
-     * @param string $name
+     *
      * @param array<string,mixed> $routeParams
      * @param array<string,mixed> $options
-     * @return string
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function generateUri(string $name, array $routeParams = [], array $options = []): string
     {
         return $this->router->generateUri($name, $routeParams, $options);
+    }
+
+    public function getApplication(): Application
+    {
+        return $this->application;
+    }
+
+    public function getContainer(): ContainerInterface
+    {
+        return $this->container;
+    }
+
+    public function getRequest(): ?ServerRequestInterface
+    {
+        return $this->request;
+    }
+
+    public function getResponse(): ?ResponseInterface
+    {
+        return $this->response;
+    }
+
+    public function getRouter(): RouterInterface
+    {
+        return $this->router;
+    }
+
+    public function getRouteResult(): ?RouteResult
+    {
+        return $this->routeResult;
     }
 
     /**
@@ -173,39 +170,33 @@ final class MezzioTestEnvironment extends Assert
         return $this->routeResult = $this->router->match($request);
     }
 
-    public function router(): RouterInterface
+    private function requireClosure(string $path): Closure
     {
-        return $this->router;
+        $result = $this->requirePath($path);
+        assert($result instanceof Closure);
+        return $result;
+    }
+
+    private function requireContainer(): ContainerInterface
+    {
+        $result = $this->requirePath('container.php');
+        assert($result instanceof ContainerInterface);
+        return $result;
     }
 
     /**
      * @psalm-suppress UnresolvableInclude
      *
-     * @return ContainerInterface|Closure(Application,MiddlewareFactory,ContainerInterface)
+     * @return Closure(Application,MiddlewareFactory,ContainerInterface)|ContainerInterface
      */
     private function requirePath(string $suffix = ''): ContainerInterface|Closure
     {
-        /** @var ContainerInterface|Closure $result */
+        /** @var Closure|ContainerInterface $result */
         $result = require $this->basePath . '/config/' . $suffix;
         if ($result instanceof Closure) {
             /** @var Closure(Application,MiddlewareFactory,ContainerInterface) $result */
             return $result;
         }
         return $result;
-    }
-
-    public function getRouteResult(): ?RouteResult
-    {
-        return $this->routeResult;
-    }
-
-    public function getResponse(): ?ResponseInterface
-    {
-        return $this->response;
-    }
-
-    public function getRequest(): ?ServerRequestInterface
-    {
-        return $this->request;
     }
 }
