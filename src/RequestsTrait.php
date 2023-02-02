@@ -266,13 +266,16 @@ trait RequestsTrait
         );
     }
 
+    /**
+     * Visit the given URI with a POST request.
+     *
      * @param array<string, string>                $parsedBody
      * @param array<UploadedFileInterface>         $uploadedFiles
      * @param array<string, array<string, string>> $headers
      * @param array<string, string>                $cookieParams
      * @param array<string, string>                $serverParams
      */
-    public function patch(
+    public function post(
         UriInterface|string $uri,
         array $parsedBody = [],
         array $uploadedFiles = [],
@@ -283,7 +286,18 @@ trait RequestsTrait
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_PATCH,
+                method: RequestMethodInterface::METHOD_POST,
+                uri: $uri,
+                parsedBody: $parsedBody,
+                uploadedFiles: $uploadedFiles,
+                body: $body,
+                headers: $headers,
+                cookieParams: $cookieParams,
+                serverParams: $serverParams
+            )
+        );
+    }
+
                 uri: $uri,
                 parsedBody: $parsedBody,
                 uploadedFiles: $uploadedFiles,
