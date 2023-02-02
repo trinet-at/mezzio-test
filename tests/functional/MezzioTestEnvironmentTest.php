@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Trinet\MezzioTest\MezzioTestEnvironment;
 
 use function dirname;
-use function Safe\json_encode;
+use function http_build_query;
 
 /**
  * @internal
@@ -90,12 +90,12 @@ final class MezzioTestEnvironmentTest extends TestCase
         $params = [
             'foo' => 'bar',
         ];
-        $this->mezzio->post('/post', $params);
+        $this->mezzio->post('/crud', $params);
 
-        $this->mezzio->assertSameMatchedRouteName('post');
+        $this->mezzio->assertSameMatchedRouteName('crud');
         $this->mezzio->assertSameRouteMiddlewareOrResponseHandler(RequestHandlerMiddleware::class);
         $this->mezzio->assertSameRequestParsedBody($params);
-        $this->mezzio->assertSameResponseBody(json_encode($params));
+        $this->mezzio->assertSameResponseBody(http_build_query($params));
     }
 
     public function testDispatchParamsArePassedToQueryForGetRequest(): void
