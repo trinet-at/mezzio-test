@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Trinet\MezzioTest\MezzioTestEnvironment;
 
 use function dirname;
-use function json_encode;
+use function Safe\json_encode;
 
 /**
  * @internal
@@ -39,7 +39,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
@@ -66,6 +66,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
@@ -76,17 +77,16 @@ final class MezzioTestEnvironmentTest extends TestCase
      */
     public function testDispatch(): void
     {
-        $result = $this->mezzio->get('/');
+        $result = $this->mezzio->dispatch('/');
 
-        $this->mezzio
-            ->assertSameResponseBody('Hi')
-            ->assertSameResponseStatusCode(StatusCodeInterface::STATUS_OK)
-            ->assertSameResponseReasonPhrase('OK')
-            ->assertSameResponseHeaders([
-                'content-type' => ['text/plain; charset=utf-8'],
-            ]);
+        $this->mezzio->assertSameResponseBody('Hi');
+        $this->mezzio->assertSameResponseStatusCode(StatusCodeInterface::STATUS_OK);
+        $this->mezzio->assertSameResponseReasonPhrase('OK');
+        $this->mezzio->assertSameResponseHeaders([
+            'content-type' => ['text/plain; charset=utf-8'],
+        ]);
+
         self::assertSame('Hi', (string)$result->getBody());
-        self::assertSame(StatusCodeInterface::STATUS_OK, $result->getStatusCode());
     }
 
     /**
@@ -99,7 +99,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseStatusCode
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::generateUri
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
@@ -115,13 +115,11 @@ final class MezzioTestEnvironmentTest extends TestCase
 
         $response = $this->mezzio->get($route);
 
-        $this->mezzio->assertSameResponseBody('Hi')
-            ->assertResponseBodyContainsString('H')
-            ->assertSameMatchedRouteName('home')
-            ->assertSameRouteMiddlewareOrResponseHandler(CallableMiddlewareDecorator::class)
-            ->assertSameResponseStatusCode(StatusCodeInterface::STATUS_OK);
-
-        self::assertSame('Hi', (string)$response->getBody());
+        $this->mezzio->assertSameResponseBody('Hi');
+        $this->mezzio->assertResponseBodyContainsString('H');
+        $this->mezzio->assertSameMatchedRouteName('home');
+        $this->mezzio->assertSameRouteMiddlewareOrResponseHandler(CallableMiddlewareDecorator::class);
+        $this->mezzio->assertSameResponseStatusCode(StatusCodeInterface::STATUS_OK);
     }
 
     /**
@@ -132,7 +130,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseStatusCode
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
@@ -152,9 +150,9 @@ final class MezzioTestEnvironmentTest extends TestCase
 
         $this->mezzio->get(uri: '/', headers: $headers);
 
-        $this->mezzio->assertSameRequestHeaders($expected)
-            ->assertSameResponseStatusCode(200)
-            ->assertSameResponseBody('Hi');
+        $this->mezzio->assertSameRequestHeaders($expected);
+        $this->mezzio->assertSameResponseStatusCode(200);
+        $this->mezzio->assertSameResponseBody('Hi');
     }
 
     /**
@@ -165,7 +163,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameRequestParsedBody
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameResponseBody
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::post
@@ -182,10 +180,10 @@ final class MezzioTestEnvironmentTest extends TestCase
         ];
         $this->mezzio->post('/post', $params);
 
-        $this->mezzio->assertSameMatchedRouteName('post')
-            ->assertSameRouteMiddlewareOrResponseHandler(RequestHandlerMiddleware::class)
-            ->assertSameRequestParsedBody($params)
-            ->assertSameResponseBody(json_encode($params));
+        $this->mezzio->assertSameMatchedRouteName('post');
+        $this->mezzio->assertSameRouteMiddlewareOrResponseHandler(RequestHandlerMiddleware::class);
+        $this->mezzio->assertSameRequestParsedBody($params);
+        $this->mezzio->assertSameResponseBody(json_encode($params));
     }
 
     /**
@@ -194,7 +192,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameRequestQueryParams
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::get
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
@@ -218,7 +216,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\TestConfigProvider::isTesting
      * @covers \Trinet\MezzioTest\TestConfigProvider::load
@@ -229,7 +227,7 @@ final class MezzioTestEnvironmentTest extends TestCase
     {
         $request = new ServerRequest([], [], '/');
 
-        $result = $this->mezzio->dispatch($request);
+        $result = $this->mezzio->dispatchRequest($request);
 
         self::assertSame('Hi', (string)$result->getBody());
         self::assertSame(StatusCodeInterface::STATUS_OK, $result->getStatusCode());
@@ -240,7 +238,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::application
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::requirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRoute
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::generateUri
@@ -255,9 +253,8 @@ final class MezzioTestEnvironmentTest extends TestCase
         $result = $this->mezzio->dispatchRoute('404');
         self::assertSame('Cannot GET /404', (string)$result->getBody());
         self::assertSame(StatusCodeInterface::STATUS_NOT_FOUND, $result->getStatusCode());
-        $this->mezzio
-            ->assertSameResponseStatusCode(StatusCodeInterface::STATUS_NOT_FOUND)
-            ->assertSameRouteMiddlewareOrResponseHandler(NotFoundHandler::class);
+        $this->mezzio->assertSameResponseStatusCode(StatusCodeInterface::STATUS_NOT_FOUND);
+        $this->mezzio->assertSameRouteMiddlewareOrResponseHandler(NotFoundHandler::class);
     }
 
     /**
@@ -266,7 +263,7 @@ final class MezzioTestEnvironmentTest extends TestCase
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::RequirePath
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::assertSameMatchedRouteName
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::container
-     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatch
+     * @covers \Trinet\MezzioTest\MezzioTestEnvironment::dispatchRequest
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::match
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::request
      * @covers \Trinet\MezzioTest\MezzioTestEnvironment::router
@@ -282,7 +279,7 @@ final class MezzioTestEnvironmentTest extends TestCase
         $request = $this->mezzio->request('GET', '/');
         self::assertSame('home', $router->match($request)->getMatchedRouteName());
 
-        $this->mezzio->dispatch($request);
+        $this->mezzio->dispatchRequest($request);
         $this->mezzio->assertSameMatchedRouteName('home');
     }
 

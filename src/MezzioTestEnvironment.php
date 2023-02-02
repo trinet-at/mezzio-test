@@ -4,36 +4,34 @@ declare(strict_types=1);
 
 namespace Trinet\MezzioTest;
 
+use Closure;
 use Fig\Http\Message\RequestMethodInterface;
-use Laminas\Diactoros\ServerRequest;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
-use Mezzio\Middleware\LazyLoadingMiddleware;
 use Mezzio\MiddlewareFactory;
 use Mezzio\Router\RouteResult;
 use Mezzio\Router\RouterInterface;
 use PHPUnit\Framework\Assert;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use ReflectionClass;
 use Throwable;
 
-use function sprintf;
+use function assert;
 
 final class MezzioTestEnvironment extends Assert
 {
+    use AssertionsTrait;
+    use RequestsTrait;
+
     private Application $application;
 
     private string $basePath;
 
     private ContainerInterface $container;
-
-    private MiddlewareFactory $middlewareFactory;
 
     private ?ServerRequestInterface $request = null;
 
@@ -43,6 +41,10 @@ final class MezzioTestEnvironment extends Assert
 
     private ?RouteResult $routeResult = null;
 
+    /**
+     * @param string|null $basePath
+     * @psalm-suppress PossiblyInvalidFunctionCall
+     */
     public function __construct(?string $basePath = null)
     {
         \Safe\putenv('APP_TESTING=true');
@@ -55,29 +57,14 @@ final class MezzioTestEnvironment extends Assert
 
         // initialize App for routes to be populated
 
-        /** @var ContainerInterface $this- >container */
-        $this->container = $this->container();
-
-        /** @var Application $this- >application */
-        $this->application = $this->application();
-
-        /** @var MiddlewareFactory $this- >middlewareFactory */
-        $this->middlewareFactory = $this->container->get(MiddlewareFactory::class);
-
-        /** @var RouterInterface $this- >router */
+        $this->container = $this->requireContainer();
+        $this->application = $this->container->get(Application::class);
         $this->router = $this->container->get(RouterInterface::class);
 
-        ($this->requirePath('pipeline.php'))(
-            $this->application,
-            $this->middlewareFactory,
-            $this->container
-        );
-
-        ($this->requirePath('routes.php'))(
-            $this->application,
-            $this->middlewareFactory,
-            $this->container
-        );
+        /** @var MiddlewareFactory $middlewareFactory */
+        $middlewareFactory = $this->container->get(MiddlewareFactory::class);
+        ($this->requireClosure('pipeline.php'))($this->application, $middlewareFactory, $this->container);
+        ($this->requireClosure('routes.php'))($this->application, $middlewareFactory, $this->container);
 
         // Attach an ErrorListener to the ErrorHandler
         if (!$this->container->has(ErrorHandler::class)) {
@@ -90,111 +77,55 @@ final class MezzioTestEnvironment extends Assert
 
     public function application(): Application
     {
-        return $this->application ??= $this->container->get(Application::class);
-    }
-
-    public function assertResponseBodyContainsString(string $string): self
-    {
-        self::assertStringContainsString($string, (string)$this->response->getBody());
-
-        return $this;
-    }
-
-    public function assertSameRouteMiddlewareOrResponseHandler(string $middlewareOrResponseHandlerClass)
-    {
-        self::assertInstanceOf(RouteResult::class, $this->routeResult);
-
-        $matchedMiddlewareOrResponseHandler = $this->routeResult
-            ->getMatchedRoute()
-            ->getMiddleware();
-
-        /** @var class-string $matchedMiddlewareOrResponseHandlerName */
-        $matchedMiddlewareOrResponseHandlerName = match (true) {
-            ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) =>(new ReflectionClass($matchedMiddlewareOrResponseHandler))
-                ->getProperty('middlewareName')
-                ->getValue($matchedMiddlewareOrResponseHandler),
-            default => $matchedMiddlewareOrResponseHandler::class
-        };
-
-        self::assertSame($middlewareOrResponseHandlerClass, $matchedMiddlewareOrResponseHandlerName);
-
-        $reflection = new ReflectionClass($matchedMiddlewareOrResponseHandlerName);
-
-        $this->assertTrue(
-            $reflection->implementsInterface(MiddlewareInterface::class) ||
-            $reflection->implementsInterface(RequestHandlerInterface::class),
-            sprintf(
-                'Class "%s" does not implement "%s" or "%s".',
-                $matchedMiddlewareOrResponseHandlerName,
-                MiddlewareInterface::class,
-                RequestHandlerInterface::class
-            )
-        );
-        return $this;
-    }
-
-    public function assertSameMatchedRouteName(string $routeName): self
-    {
-        self::assertSame($routeName, $this->routeResult->getMatchedRouteName());
-
-        return $this;
-    }
-
-    public function assertSameRequestHeaders(array $headers): self
-    {
-        self::assertSame($headers, $this->request->getHeaders());
-
-        return $this;
-    }
-
-    public function assertSameRequestParsedBody(array $parsedBody): self
-    {
-        self::assertSame($parsedBody, $this->request->getParsedBody());
-
-        return $this;
-    }
-
-    public function assertSameRequestQueryParams(array $queryParams): self
-    {
-        self::assertSame($queryParams, $this->request->getQueryParams());
-
-        return $this;
-    }
-
-    public function assertSameResponseBody(string $content): self
-    {
-        self::assertSame($content, (string)$this->response->getBody());
-
-        return $this;
-    }
-
-    public function assertSameResponseHeaders(array $headers): self
-    {
-        self::assertSame($headers, $this->response->getHeaders());
-
-        return $this;
-    }
-
-    public function assertSameResponseReasonPhrase(string $reasonPhrase): self
-    {
-        self::assertSame($reasonPhrase, $this->response->getReasonPhrase());
-
-        return $this;
-    }
-
-    public function assertSameResponseStatusCode(int $statusCode): self
-    {
-        self::assertSame($statusCode, $this->response->getStatusCode());
-
-        return $this;
+        return $this->application;
     }
 
     public function container(): ContainerInterface
     {
-        return $this->container ??= $this->requirePath('container.php');
+        return $this->container;
     }
 
-    public function dispatch(ServerRequestInterface $request): ResponseInterface
+    private function requireContainer(): ContainerInterface
+    {
+        $result = $this->requirePath('container.php');
+        assert($result instanceof ContainerInterface);
+        return $result;
+    }
+
+    private function requireClosure(string $path): Closure
+    {
+        $result = $this->requirePath($path);
+        assert($result instanceof Closure);
+        return $result;
+    }
+
+    /**
+     * @param UriInterface|string $uri
+     * @param string $method
+     * @param array<string,string> $params
+     * @param array<string|array<string>> $headers
+     * @return ResponseInterface
+     */
+    public function dispatch(
+        UriInterface|string $uri,
+        string $method = RequestMethodInterface::METHOD_GET,
+        array $params = [],
+        array $headers = []
+    ): ResponseInterface {
+        $withQueryParams = $method === RequestMethodInterface::METHOD_GET ? $params : [];
+        $withParsedBody = $method !== RequestMethodInterface::METHOD_GET ? $params : [];
+
+        $request = $this->request(
+            method:$method,
+            uri: $uri,
+            queryParams: $withQueryParams,
+            parsedBody: $withParsedBody,
+            headers: $headers
+        );
+        return $this->dispatchRequest($request);
+    }
+
+    public function dispatchRequest(ServerRequestInterface $request): ResponseInterface
     {
         $this->request = $request;
 
@@ -217,43 +148,21 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         $routeUrl = $this->generateUri($routeName, $routeParams);
 
-        return $this->dispatch($this->request($method, $routeUrl, $queryParams, $headers));
+        return $this->dispatchRequest($this->request($method, $routeUrl, $queryParams, $headers));
     }
 
     /**
      * Generate a URI from the named route.
+     * @param string $name
+     * @param array<string,mixed> $routeParams
+     * @param array<string,mixed> $options
+     * @return string
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function generateUri(string $name, array $routeParams = [], array $options = []): string
     {
         return $this->router->generateUri($name, $routeParams, $options);
-    }
-
-    /**
-     * Visit the given URI with a GET request.
-     *
-     * @param array<string, mixed>                        $queryParams
-     * @param array<string, array<string, string>|string> $headers
-     * @param array<string, string>                       $cookieParams
-     * @param array<string, string>                       $serverParams
-     *
-     */
-    public function get(
-        UriInterface|string $uri,
-        array $queryParams = [],
-        array $headers = [],
-        array $cookieParams = [],
-        array $serverParams = [],
-    ): ResponseInterface {
-        return $this->dispatch(
-            $this->request(
-                method: RequestMethodInterface::METHOD_GET,
-                uri: $uri,
-                queryParams: $queryParams,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
-            )
-        );
     }
 
     /**
@@ -264,109 +173,6 @@ final class MezzioTestEnvironment extends Assert
         return $this->routeResult = $this->router->match($request);
     }
 
-    /**
-     * Visit the given URI with a PATCH request.
-     *
-     * @param array<string, string>                $parsedBody
-     * @param array<UploadedFileInterface>         $uploadedFiles
-     * @param array<string, array<string, string>> $headers
-     * @param array<string, string>                $cookieParams
-     * @param array<string, string>                $serverParams
-     *
-     */
-    public function patch(
-        UriInterface|string $uri,
-        array $parsedBody = [],
-        array $uploadedFiles = [],
-        string $body = 'php://input',
-        array $headers = [],
-        array $cookieParams = [],
-        array $serverParams = [],
-    ): ResponseInterface {
-        return $this->dispatch(
-            $this->request(
-                method: RequestMethodInterface::METHOD_PATCH,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                uploadedFiles: $uploadedFiles,
-                body: $body,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
-            )
-        );
-    }
-
-    /**
-     * Visit the given URI with a POST request.
-     *
-     * @param array<string, string>                $parsedBody
-     * @param array<UploadedFileInterface>         $uploadedFiles
-     * @param array<string, array<string, string>> $headers
-     * @param array<string, string>                $cookieParams
-     * @param array<string, string>                $serverParams
-     *
-     */
-    public function post(
-        UriInterface|string $uri,
-        array $parsedBody = [],
-        array $uploadedFiles = [],
-        string $body = 'php://input',
-        array $headers = [],
-        array $cookieParams = [],
-        array $serverParams = [],
-    ): ResponseInterface {
-        return $this->dispatch(
-            $this->request(
-                method: RequestMethodInterface::METHOD_POST,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                uploadedFiles: $uploadedFiles,
-                body: $body,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
-            )
-        );
-    }
-
-    /**
-     * Build a Request.
-     *
-     * @param array<string, mixed>                        $queryParams
-     * @param array<string, string>                       $parsedBody
-     * @param array<UploadedFileInterface>                $uploadedFiles
-     * @param array<string, array<string, string>|string> $headers
-     * @param array<string, string>                       $cookieParams
-     * @param array<string, string>                       $serverParams
-     *
-     */
-    public function request(
-        string $method,
-        string|UriInterface $uri,
-        array $queryParams = [],
-        array $parsedBody = [],
-        array $uploadedFiles = [],
-        string $body = 'php://input',
-        array $headers = [],
-        array $cookieParams = [],
-        array $serverParams = [],
-        string $protocol = '1.1'
-    ): ServerRequestInterface {
-        return $this->request = new ServerRequest(
-            $serverParams,
-            $uploadedFiles,
-            $uri,
-            $method,
-            $body,
-            $headers,
-            $cookieParams,
-            $queryParams,
-            $parsedBody,
-            $protocol
-        );
-    }
-
     public function router(): RouterInterface
     {
         return $this->router;
@@ -375,10 +181,31 @@ final class MezzioTestEnvironment extends Assert
     /**
      * @psalm-suppress UnresolvableInclude
      *
-     * @return array|callable
+     * @return ContainerInterface|Closure(Application,MiddlewareFactory,ContainerInterface)
      */
-    private function requirePath(?string $suffix = null): mixed
+    private function requirePath(string $suffix = ''): ContainerInterface|Closure
     {
-        return require $this->basePath . '/config/' . $suffix;
+        /** @var ContainerInterface|Closure $result */
+        $result = require $this->basePath . '/config/' . $suffix;
+        if ($result instanceof Closure) {
+            /** @var Closure(Application,MiddlewareFactory,ContainerInterface) $result */
+            return $result;
+        }
+        return $result;
+    }
+
+    public function getRouteResult(): ?RouteResult
+    {
+        return $this->routeResult;
+    }
+
+    public function getResponse(): ?ResponseInterface
+    {
+        return $this->response;
+    }
+
+    public function getRequest(): ?ServerRequestInterface
+    {
+        return $this->request;
     }
 }
