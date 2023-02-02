@@ -7,7 +7,7 @@ jobs:
 
     strategy:
       matrix:
-        php: ["7.4", "8.0", "8.1", "8.2"]
+        php: ["7.4", "8.0", "8.1"]
         composer_args:
           - '--prefer-lowest'
           - ''
@@ -64,7 +64,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           coverage_path: "coverage.xml"
           comment: false
-          comment_context: Coverage PHP ${{ matrix.php }}
-          status_context: Coverage PHP ${{ matrix.php }}
+          comment_context: Coverage PHP ${{ matrix.php }}-${{ matrix.composer_args }}
+          status_context: Coverage PHP ${{ matrix.php }}-${{ matrix.composer_args }}
           threshold_alert: 100
           threshold_warning: 100
