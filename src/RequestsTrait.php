@@ -351,6 +351,18 @@ trait RequestsTrait
         return $this->dispatchRequest(
             $this->request(
                 method: RequestMethodInterface::METHOD_POST,
+    public function putJson(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        string $body = 'php://input',
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                method: RequestMethodInterface::METHOD_PUT,
                 uri: $uri,
                 parsedBody: $parsedBody,
                 uploadedFiles: $uploadedFiles,
