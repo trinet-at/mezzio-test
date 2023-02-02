@@ -8,11 +8,7 @@ use Mezzio\Router\ConfigProvider as RouterConfig;
 use Mezzio\Router\FastRouteRouter\ConfigProvider as FastRouteConfig;
 use Trinet\MezzioTest\TestConfigProvider;
 
-$providers = [
-    FastRouteConfig::class,
-    MezzioConfig::class,
-    RouterConfig::class,
-];
+$providers = [FastRouteConfig::class, MezzioConfig::class, RouterConfig::class];
 
 if (getenv('APP_TESTING') !== false) {
     $providers = array_merge($providers, TestConfigProvider::load(__DIR__ . '/autoload/'));

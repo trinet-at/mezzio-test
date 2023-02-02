@@ -15,15 +15,14 @@ final class TestConfigProvider
      */
     public static function load(?string $configDir = null): array
     {
-        if (!self::isTesting()) {
+        if (! self::isTesting()) {
             return [];
         }
         $configDir = self::prepareConfigDir($configDir);
-        return
-            [
-                new PhpFileProvider($configDir . '{{,*.}testing,{,*.}testing.local}.php'),
-                new PhpFileProvider($configDir . 'testing/{{,*.}testing,{,*.}testing.local}.php'),
-            ];
+        return [
+            new PhpFileProvider($configDir . '{{,*.}testing,{,*.}testing.local}.php'),
+            new PhpFileProvider($configDir . 'testing/{{,*.}testing,{,*.}testing.local}.php'),
+        ];
     }
 
     private static function isTesting(): bool

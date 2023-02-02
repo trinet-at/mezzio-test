@@ -10,8 +10,19 @@ use UnexpectedValueException;
 
 use function dirname;
 
-class UtilTest extends TestCase
+/**
+ * @internal
+ *
+ * @small
+ *
+ * @coversDefaultClass \Trinet\MezzioTest\Util
+ */
+final class UtilTest extends TestCase
 {
+    /**
+     * @covers \Trinet\MezzioTest\Util::basePath
+     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
+     */
     public function testBasePath(): void
     {
         $result = Util::basePath();
@@ -19,6 +30,9 @@ class UtilTest extends TestCase
         self::assertSame(Util::ensureTrailingSlash(dirname(__DIR__, 2)), $result);
     }
 
+    /**
+     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
+     */
     public function testEnsureTrailingSlash(): void
     {
         $path = 'foo/bar';
@@ -28,6 +42,21 @@ class UtilTest extends TestCase
         self::assertSame($path . '/', $result);
     }
 
+    /**
+     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
+     */
+    public function testEnsureTrailingSlashBailsEarlyIfGivenPathAlreadyHasATrailingSlash(): void
+    {
+        $path = 'foo/bar/';
+
+        $result = Util::ensureTrailingSlash($path);
+
+        self::assertSame($path, $result);
+    }
+
+    /**
+     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
+     */
     public function testEnsureTrailingSlashThrowsExceptionIfEmptyStringIsGiven(): void
     {
         $this->expectException(UnexpectedValueException::class);
@@ -36,20 +65,14 @@ class UtilTest extends TestCase
         Util::ensureTrailingSlash('');
     }
 
+    /**
+     * @covers \Trinet\MezzioTest\Util::ensureTrailingSlash
+     */
     public function testEnsureTrailingSlashThrowsExceptionIfEmptyStringWithWithespaceIsGiven(): void
     {
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('Given path must not be an empty string.');
 
         Util::ensureTrailingSlash(' ');
-    }
-
-    public function testEnsureTrailingSlashBailsEarlyIfGivenPathAlreadyHasATrailingSlash(): void
-    {
-        $path = 'foo/bar/';
-
-        $result = Util::ensureTrailingSlash($path);
-
-        self::assertSame($path, $result);
     }
 }

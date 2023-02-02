@@ -23,6 +23,7 @@ final class ReflectionUtil
 
     /**
      * @param mixed $value
+     *
      * @throws ReflectionException
      */
     public static function setReflectionProperty(object $object, string $property, $value): void
