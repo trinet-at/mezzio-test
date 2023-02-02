@@ -397,4 +397,45 @@ trait RequestsTrait
             $protocol
         );
     }
+
+    /**
+     * Build a Request, expecting a JSON response.
+     *
+     * @param array<string, mixed>                        $queryParams
+     * @param array<string, string>                       $parsedBody
+     * @param array<UploadedFileInterface>                $uploadedFiles
+     * @param array<string, array<string, string>|string> $headers
+     * @param array<string, string>                       $cookieParams
+     * @param array<string, string>                       $serverParams
+     */
+    public function requestJson(
+        string $method,
+        string|UriInterface $uri,
+        array $queryParams = [],
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        string $body = 'php://input',
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+        string $protocol = '1.1'
+    ): ServerRequestInterface {
+        $headers = array_merge($headers, [
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ]);
+
+        return $this->request(
+            $method,
+            $uri,
+            $queryParams,
+            $parsedBody,
+            $uploadedFiles,
+            $body,
+            $headers,
+            $cookieParams,
+            $serverParams,
+            $protocol,
+        );
+    }
 }
