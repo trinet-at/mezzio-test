@@ -16,14 +16,15 @@ return static function (Application $app): void {
     $app->get('/error', static function (): void {
         throw new LogicException('I have an error');
     }, 'error');
-    $app->post(
-        '/post',
-        new class () implements RequestHandlerInterface {
-            public function handle(ServerRequestInterface $request): ResponseInterface
-            {
-                return new JsonResponse($request->getParsedBody());
+    $app->any('/crud', new class () implements RequestHandlerInterface {
+        public function handle(ServerRequestInterface $request): ResponseInterface
+        {
+            $body = array_merge((array)$request->getParsedBody(), $request->getQueryParams());
+            if (str_contains($request->getHeaderLine('Content-Type'), 'json')) {
+                return new JsonResponse($body);
             }
-        },
-        'post'
-    );
+
+            return new TextResponse(http_build_query($body));
+        }
+    }, 'crud');
 };
