@@ -41,6 +41,33 @@ trait RequestsTrait
     }
 
     /**
+     * Visit the given URI with a DELETE request, expecting a JSON response.
+     *
+     * @param array<string,string>                      $parsedBody
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function deleteJson(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                method: RequestMethodInterface::METHOD_DELETE,
+                uri: $uri,
+                parsedBody: $parsedBody,
+                headers: $headers,
+                cookieParams: $cookieParams,
+                serverParams: $serverParams
+            )
+        );
+    }
+
+    /**
      * Visit the given URI with a GET request.
      *
      * @param array<string, mixed>                        $queryParams
