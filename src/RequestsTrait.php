@@ -339,7 +339,7 @@ trait RequestsTrait
      * @param array<string, string>                $cookieParams
      * @param array<string, string>                $serverParams
      */
-    public function post(
+    public function put(
         UriInterface|string $uri,
         array $parsedBody = [],
         array $uploadedFiles = [],
@@ -350,7 +350,18 @@ trait RequestsTrait
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_POST,
+                method: RequestMethodInterface::METHOD_PUT,
+                uri: $uri,
+                parsedBody: $parsedBody,
+                uploadedFiles: $uploadedFiles,
+                body: $body,
+                headers: $headers,
+                cookieParams: $cookieParams,
+                serverParams: $serverParams
+            )
+        );
+    }
+
     public function putJson(
         UriInterface|string $uri,
         array $parsedBody = [],
