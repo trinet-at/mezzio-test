@@ -121,12 +121,15 @@ trait RequestsTrait
         );
     }
 
-     * @param array<string, mixed>                        $queryParams
-     * @param array<string, array<string, string>|string> $headers
-     * @param array<string, string>                       $cookieParams
-     * @param array<string, string>                       $serverParams
+    /**
+     * Visit the given URI with a HEAD request.
+     *
+     * @param array<string,string>                      $queryParams
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
      */
-    public function get(
+    public function head(
         UriInterface|string $uri,
         array $queryParams = [],
         array $headers = [],
@@ -135,7 +138,16 @@ trait RequestsTrait
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_GET,
+                method: RequestMethodInterface::METHOD_HEAD,
+                uri: $uri,
+                queryParams: $queryParams,
+                headers: $headers,
+                cookieParams: $cookieParams,
+                serverParams: $serverParams
+            )
+        );
+    }
+
     /**
      * Visit the given URI with a OPTIONS request.
      *
