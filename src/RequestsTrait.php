@@ -136,6 +136,33 @@ trait RequestsTrait
         return $this->dispatchRequest(
             $this->request(
                 method: RequestMethodInterface::METHOD_GET,
+    /**
+     * Visit the given URI with a OPTIONS request.
+     *
+     * @param array<string,string>                      $queryParams
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function options(
+        UriInterface|string $uri,
+        array $queryParams = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                method: RequestMethodInterface::METHOD_OPTIONS,
+                uri: $uri,
+                queryParams: $queryParams,
+                headers: $headers,
+                cookieParams: $cookieParams,
+                serverParams: $serverParams
+            )
+        );
+    }
+
                 uri: $uri,
                 queryParams: $queryParams,
                 headers: $headers,
