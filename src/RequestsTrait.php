@@ -163,6 +163,24 @@ trait RequestsTrait
         );
     }
 
+    /**
+     * Visit the given URI with a OPTIONS request, expecting a JSON response.
+     *
+     * @param array<string,string>                      $queryParams
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function optionsJson(
+        UriInterface|string $uri,
+        array $queryParams = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                method: RequestMethodInterface::METHOD_OPTIONS,
                 uri: $uri,
                 queryParams: $queryParams,
                 headers: $headers,
