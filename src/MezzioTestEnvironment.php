@@ -8,6 +8,7 @@ use Fig\Http\Message\RequestMethodInterface;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
+use Mezzio\Middleware\LazyLoadingMiddleware;
 use Mezzio\MiddlewareFactory;
 use Mezzio\Router\RouteResult;
 use Mezzio\Router\RouterInterface;
@@ -18,6 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionClass;
 use Throwable;
 
@@ -98,7 +100,7 @@ final class MezzioTestEnvironment extends Assert
         return $this;
     }
 
-    public function assertRouteMiddleware(string $middlewareOrResponseHandlerClass)
+    public function assertSameRouteMiddlewareOrResponseHandler(string $middlewareOrResponseHandlerClass)
     {
         self::assertInstanceOf(RouteResult::class, $this->routeResult);
 
@@ -106,19 +108,26 @@ final class MezzioTestEnvironment extends Assert
             ->getMatchedRoute()
             ->getMiddleware();
 
-        $middlewareOrResponseHandlerName = (new ReflectionClass($matchedMiddlewareOrResponseHandler))
-            ->getProperty('middlewareName')
-            ->getValue($matchedMiddlewareOrResponseHandler);
+        /** @var class-string $matchedMiddlewareOrResponseHandlerName */
+        $matchedMiddlewareOrResponseHandlerName = match (true) {
+            ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) =>(new ReflectionClass($matchedMiddlewareOrResponseHandler))
+                ->getProperty('middlewareName')
+                ->getValue($matchedMiddlewareOrResponseHandler),
+            default => $matchedMiddlewareOrResponseHandler::class
+        };
 
-        self::assertSame($middlewareOrResponseHandlerClass, $middlewareOrResponseHandlerName);
+        self::assertSame($middlewareOrResponseHandlerClass, $matchedMiddlewareOrResponseHandlerName);
+
+        $reflection = new ReflectionClass($matchedMiddlewareOrResponseHandlerName);
 
         $this->assertTrue(
-            (new ReflectionClass($middlewareOrResponseHandlerName))
-                ->implementsInterface(MiddlewareInterface::class),
+            $reflection->implementsInterface(MiddlewareInterface::class) ||
+            $reflection->implementsInterface(RequestHandlerInterface::class),
             sprintf(
-                'Class "%s" does not implement "%s".',
-                $middlewareOrResponseHandlerClass,
-                MiddlewareInterface::class
+                'Class "%s" does not implement "%s" or "%s".',
+                $matchedMiddlewareOrResponseHandlerName,
+                MiddlewareInterface::class,
+                RequestHandlerInterface::class
             )
         );
         return $this;
@@ -189,7 +198,7 @@ final class MezzioTestEnvironment extends Assert
     {
         $this->request = $request;
 
-        $this->routeResult = $this->router->match($request);
+        $this->match($request);
 
         return $this->response = $this->application->handle($request);
     }
@@ -207,8 +216,6 @@ final class MezzioTestEnvironment extends Assert
         array $headers = []
     ): ResponseInterface {
         $routeUrl = $this->generateUri($routeName, $routeParams);
-
-        self::assertSame('/', $routeUrl);
 
         return $this->dispatch($this->request($method, $routeUrl, $queryParams, $headers));
     }
