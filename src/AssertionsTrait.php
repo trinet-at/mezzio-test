@@ -14,6 +14,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionClass;
 
+use function assert;
 use function sprintf;
 
 trait AssertionsTrait
@@ -36,7 +37,16 @@ trait AssertionsTrait
     public function assertSameRequestHeaders(array $headers): void
     {
         Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame($headers, $this->request->getHeaders());
+        Assert::assertSame(
+            $headers,
+            $this->request->getHeaders(),
+            'Failed asserting that RequestHeaders are identical.'
+        );
+    }
+
+    public function assertSameRequestMethod(string $method): void
+    {
+        Assert::assertSame($method, $this->request->getMethod());
     }
 
     /**
@@ -45,7 +55,11 @@ trait AssertionsTrait
     public function assertSameRequestParsedBody(array $parsedBody): void
     {
         Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame($parsedBody, $this->request->getParsedBody());
+        Assert::assertSame(
+            $parsedBody,
+            $this->request->getParsedBody(),
+            'Failed asserting that ParsedBody are identical.'
+        );
     }
 
     /**
@@ -53,14 +67,22 @@ trait AssertionsTrait
      */
     public function assertSameRequestQueryParams(array $queryParams): void
     {
-        Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame($queryParams, $this->request->getQueryParams());
+        assert($this->request instanceof RequestInterface);
+        Assert::assertSame(
+            $queryParams,
+            $this->request->getQueryParams(),
+            'Failed asserting that QueryParams are identical.'
+        );
     }
 
     public function assertSameResponseBody(string $content): void
     {
         Assert::assertInstanceOf(ResponseInterface::class, $this->response);
-        Assert::assertSame($content, (string)$this->response->getBody());
+        Assert::assertSame(
+            $content,
+            (string)$this->response->getBody(),
+            'Failed asserting that ResponseBody is identical.'
+        );
     }
 
     /**

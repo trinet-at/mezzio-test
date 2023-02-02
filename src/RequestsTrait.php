@@ -11,6 +11,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 
+use function array_merge;
+
 trait RequestsTrait
 {
     /**
@@ -215,7 +217,6 @@ trait RequestsTrait
         UriInterface|string $uri,
         array $parsedBody = [],
         array $uploadedFiles = [],
-        string $body = 'php://input',
         array $headers = [],
         array $cookieParams = [],
         array $serverParams = [],
@@ -226,7 +227,6 @@ trait RequestsTrait
                 uri: $uri,
                 parsedBody: $parsedBody,
                 uploadedFiles: $uploadedFiles,
-                body: $body,
                 headers: $headers,
                 cookieParams: $cookieParams,
                 serverParams: $serverParams
@@ -247,7 +247,6 @@ trait RequestsTrait
         UriInterface|string $uri,
         array $parsedBody = [],
         array $uploadedFiles = [],
-        string $body = 'php://input',
         array $headers = [],
         array $cookieParams = [],
         array $serverParams = [],
@@ -258,7 +257,6 @@ trait RequestsTrait
                 uri: $uri,
                 parsedBody: $parsedBody,
                 uploadedFiles: $uploadedFiles,
-                body: $body,
                 headers: $headers,
                 cookieParams: $cookieParams,
                 serverParams: $serverParams
@@ -279,7 +277,6 @@ trait RequestsTrait
         UriInterface|string $uri,
         array $parsedBody = [],
         array $uploadedFiles = [],
-        string $body = 'php://input',
         array $headers = [],
         array $cookieParams = [],
         array $serverParams = [],
@@ -290,7 +287,6 @@ trait RequestsTrait
                 uri: $uri,
                 parsedBody: $parsedBody,
                 uploadedFiles: $uploadedFiles,
-                body: $body,
                 headers: $headers,
                 cookieParams: $cookieParams,
                 serverParams: $serverParams
@@ -311,7 +307,6 @@ trait RequestsTrait
         UriInterface|string $uri,
         array $parsedBody = [],
         array $uploadedFiles = [],
-        string $body = 'php://input',
         array $headers = [],
         array $cookieParams = [],
         array $serverParams = [],
@@ -322,7 +317,6 @@ trait RequestsTrait
                 uri: $uri,
                 parsedBody: $parsedBody,
                 uploadedFiles: $uploadedFiles,
-                body: $body,
                 headers: $headers,
                 cookieParams: $cookieParams,
                 serverParams: $serverParams
@@ -343,7 +337,6 @@ trait RequestsTrait
         UriInterface|string $uri,
         array $parsedBody = [],
         array $uploadedFiles = [],
-        string $body = 'php://input',
         array $headers = [],
         array $cookieParams = [],
         array $serverParams = [],
@@ -354,7 +347,6 @@ trait RequestsTrait
                 uri: $uri,
                 parsedBody: $parsedBody,
                 uploadedFiles: $uploadedFiles,
-                body: $body,
                 headers: $headers,
                 cookieParams: $cookieParams,
                 serverParams: $serverParams
@@ -366,7 +358,6 @@ trait RequestsTrait
         UriInterface|string $uri,
         array $parsedBody = [],
         array $uploadedFiles = [],
-        string $body = 'php://input',
         array $headers = [],
         array $cookieParams = [],
         array $serverParams = [],
@@ -377,7 +368,6 @@ trait RequestsTrait
                 uri: $uri,
                 parsedBody: $parsedBody,
                 uploadedFiles: $uploadedFiles,
-                body: $body,
                 headers: $headers,
                 cookieParams: $cookieParams,
                 serverParams: $serverParams
@@ -401,23 +391,19 @@ trait RequestsTrait
         array $queryParams = [],
         array $parsedBody = [],
         array $uploadedFiles = [],
-        string $body = 'php://input',
         array $headers = [],
         array $cookieParams = [],
         array $serverParams = [],
-        string $protocol = '1.1'
     ): ServerRequestInterface {
         return $this->request = new ServerRequest(
-            $serverParams,
-            $uploadedFiles,
-            $uri,
-            $method,
-            $body,
-            $headers,
-            $cookieParams,
-            $queryParams,
-            $parsedBody,
-            $protocol
+            serverParams: $serverParams,
+            uploadedFiles: $uploadedFiles,
+            uri: $uri,
+            method: $method,
+            headers: $headers,
+            cookieParams: $cookieParams,
+            queryParams: $queryParams,
+            parsedBody: $parsedBody,
         );
     }
 
@@ -437,11 +423,9 @@ trait RequestsTrait
         array $queryParams = [],
         array $parsedBody = [],
         array $uploadedFiles = [],
-        string $body = 'php://input',
         array $headers = [],
         array $cookieParams = [],
         array $serverParams = [],
-        string $protocol = '1.1'
     ): ServerRequestInterface {
         $headers = array_merge($headers, [
             'Content-Type' => 'application/json',
@@ -449,16 +433,14 @@ trait RequestsTrait
         ]);
 
         return $this->request(
-            $method,
-            $uri,
-            $queryParams,
-            $parsedBody,
-            $uploadedFiles,
-            $body,
-            $headers,
-            $cookieParams,
-            $serverParams,
-            $protocol,
+            method: $method,
+            uri: $uri,
+            queryParams: $queryParams,
+            parsedBody: $parsedBody,
+            uploadedFiles: $uploadedFiles,
+            headers: $headers,
+            cookieParams: $cookieParams,
+            serverParams: $serverParams,
         );
     }
 }
