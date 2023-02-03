@@ -6,7 +6,6 @@ namespace Trinet\Test\Functional\MezzioTest;
 
 use Fig\Http\Message\RequestMethodInterface;
 use Fig\Http\Message\StatusCodeInterface;
-use Generator;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UploadedFileInterface;
 use Trinet\MezzioTest\MezzioTestEnvironment;
@@ -69,7 +68,8 @@ final class RequestsTraitTest extends TestCase
         $this->mezzio = new MezzioTestEnvironment($basePath);
     }
 
-    public function crudDataProvider(): Generator
+    /** iterable<string, array<string, mixed>> */
+    public function crudDataProvider(): iterable
     {
         $emptyQueryParams = [];
         $emptyHeaders = [];

@@ -46,6 +46,7 @@ trait AssertionsTrait
 
     public function assertSameRequestMethod(string $method): void
     {
+        Assert::assertInstanceOf(RequestInterface::class, $this->request);
         Assert::assertSame($method, $this->request->getMethod());
     }
 
@@ -129,7 +130,7 @@ trait AssertionsTrait
 
         Assert::assertTrue(
             $reflection->implementsInterface(MiddlewareInterface::class) ||
-            $reflection->implementsInterface(RequestHandlerInterface::class),
+                $reflection->implementsInterface(RequestHandlerInterface::class),
             sprintf(
                 'Class "%s" does not implement "%s" or "%s".',
                 $matchedMiddlewareOrResponseHandlerName,

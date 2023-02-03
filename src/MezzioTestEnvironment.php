@@ -55,7 +55,11 @@ final class MezzioTestEnvironment extends Assert
         // initialize App for routes to be populated
 
         $this->container = $this->requireContainer();
+
+        /** @var Application $this->application */
         $this->application = $this->container->get(Application::class);
+
+        /** @var RouterInterface $this->router */
         $this->router = $this->container->get(RouterInterface::class);
 
         /** @var MiddlewareFactory $middlewareFactory */
@@ -64,17 +68,18 @@ final class MezzioTestEnvironment extends Assert
         ($this->requireClosure('routes.php'))($this->application, $middlewareFactory, $this->container);
 
         // Attach an ErrorListener to the ErrorHandler
-        if (! $this->container->has(ErrorHandler::class)) {
+        if (!$this->container->has(ErrorHandler::class)) {
             return;
         }
 
-        $this->container->get(ErrorHandler::class)
-            ->attachListener(static fn (Throwable $error) => throw $error);
+        /** @var ErrorHandler $errorHandler */
+        $errorHandler = $this->container->get(ErrorHandler::class);
+        $errorHandler->attachListener(static fn (Throwable $error) => throw $error);
     }
 
     /**
-     * @param array<string,string>        $params
-     * @param array<array<string>|string> $headers
+     * @param array<string,string>                      $params
+     * @param array<string,array<string,string>|string> $headers
      */
     public function dispatch(
         UriInterface|string $uri,

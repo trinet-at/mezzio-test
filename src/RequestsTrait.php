@@ -325,7 +325,7 @@ trait RequestsTrait
     }
 
     /**
-     * Visit the given URI with a POST request.
+     * Visit the given URI with a PUT request.
      *
      * @param array<string, string>                $parsedBody
      * @param array<UploadedFileInterface>         $uploadedFiles
@@ -354,6 +354,15 @@ trait RequestsTrait
         );
     }
 
+    /**
+     * Visit the given URI with a PUT request, expecting a JSON response.
+     *
+     * @param array<string, string>                $parsedBody
+     * @param array<UploadedFileInterface>         $uploadedFiles
+     * @param array<string, array<string, string>> $headers
+     * @param array<string, string>                $cookieParams
+     * @param array<string, string>                $serverParams
+     */
     public function putJson(
         UriInterface|string $uri,
         array $parsedBody = [],

@@ -8,22 +8,17 @@ use ReflectionObject;
 
 final class ReflectionUtil
 {
-    /**
-     * @return mixed
-     */
-    public static function getReflectionProperty(object $object, string $property)
+    public static function getReflectionProperty(object $object, string $property): mixed
     {
         $reflectionProperty = (new ReflectionObject($object))->getProperty($property);
         $reflectionProperty->setAccessible(true);
+        /** @var mixed $value */
         $value = $reflectionProperty->getValue($object);
         $reflectionProperty->setAccessible(false);
         return $value;
     }
 
-    /**
-     * @param mixed $value
-     */
-    public static function setReflectionProperty(object $object, string $property, $value): void
+    public static function setReflectionProperty(object $object, string $property, mixed $value): void
     {
         $reflectionProperty = (new ReflectionObject($object))->getProperty($property);
         $reflectionProperty->setAccessible(true);
