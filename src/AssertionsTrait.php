@@ -219,15 +219,18 @@ trait AssertionsTrait
         );
     }
 
-    public function assertResponseStatusCode(ResponseInterface $response, int $expected): void
+    /**
+     * @param array<string,mixed> $expected
+     */
+    public function assertServerRequestParsedBody(ServerRequestInterface $request, array $expected): void
     {
         $this->assert(
             $this->constraint(
                 $expected,
-                static fn (int $expectedValue, int $actualValue): bool => $expectedValue === $actualValue,
-                $response::class . '::getStatusCode()'
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getParsedBody()', $request::class)
             ),
-            $response->getStatusCode()
+            $request->getParsedBody()
         );
     }
 
