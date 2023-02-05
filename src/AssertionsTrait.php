@@ -94,15 +94,17 @@ trait AssertionsTrait
     /**
      * @param array<string> $expected
      */
-    public function assertRequestHeaderMatches(ServerRequestInterface $request, string $name, array $expected): void
+    public function assertResponseHeader(ResponseInterface $response, string $name, array $expected = []): void
     {
+        $this->assertResponseHasHeader($response, $name);
+
         $this->assert(
             $this->constraint(
                 $expected,
                 static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getHeader("%s")', $request::class, $name)
+                sprintf('%s::getHeader("%s")', $response::class, $name)
             ),
-            $request->getHeader($name)
+            $response->getHeader($name)
         );
     }
 
