@@ -111,15 +111,17 @@ trait AssertionsTrait
     }
 
     /**
-     * @param array<string,mixed> $queryParams
+     * @param array<string,mixed> $expected
      */
-    public function assertSameRequestQueryParams(array $queryParams): void
+    public function assertRequestQueryParams(ServerRequestInterface $request, array $expected): void
     {
-        assert($this->request instanceof RequestInterface);
-        Assert::assertSame(
-            $queryParams,
-            $this->request->getQueryParams(),
-            'Failed asserting that QueryParams are identical.'
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getQueryParams()', $request::class)
+            ),
+            $request->getQueryParams()
         );
     }
 
