@@ -249,6 +249,17 @@ trait AssertionsTrait
                 ->getValue($matchedMiddlewareOrResponseHandler),
             default => $matchedMiddlewareOrResponseHandler::class
         };
+    public function assertServerRequestRequestTarget(ServerRequestInterface $request, string $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getRequestTarget()', $request::class)
+            ),
+            $request->getRequestTarget()
+        );
+    }
 
         Assert::assertSame($middlewareOrResponseHandlerClass, $matchedMiddlewareOrResponseHandlerName);
         $reflection = new ReflectionClass($matchedMiddlewareOrResponseHandlerName);
