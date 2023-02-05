@@ -32,6 +32,18 @@ trait AssertionsTrait
         );
     }
 
+    public function assertNotResponseStatusCode(ResponseInterface $response, int $expected): void
+    {
+        $this->assertNot(
+            $this->constraint(
+                $expected,
+                static fn (int $expectedValue, int $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getStatusCode()', $response::class)
+            ),
+            $response->getStatusCode()
+        );
+    }
+
     {
         Assert::assertInstanceOf(ResponseInterface::class, $this->response);
         Assert::assertStringContainsString($string, (string)$this->response->getBody());
