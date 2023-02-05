@@ -125,13 +125,15 @@ trait AssertionsTrait
         );
     }
 
-    public function assertSameResponseBody(string $content): void
+    public function assertResponseBody(ResponseInterface $response, string $expected): void
     {
-        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
-        Assert::assertSame(
-            $content,
-            (string)$this->response->getBody(),
-            'Failed asserting that ResponseBody is identical.'
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                $response::class . '::getBody()'
+            ),
+            (string)$response->getBody()
         );
     }
 
