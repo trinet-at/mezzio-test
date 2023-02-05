@@ -164,10 +164,18 @@ trait AssertionsTrait
         );
     }
 
-    public function assertSameResponseReasonPhrase(string $reasonPhrase): void
+    public function assertResponseHeader(ResponseInterface $response, string $name, array $expected = []): void
     {
-        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
-        Assert::assertSame($reasonPhrase, $this->response->getReasonPhrase());
+        $this->assertResponseHasHeader($response, $name);
+
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getHeader("%s")', $response::class, $name)
+            ),
+            $response->getHeader($name)
+        );
     }
 
     public function assertSameResponseStatusCode(int $statusCode): void
