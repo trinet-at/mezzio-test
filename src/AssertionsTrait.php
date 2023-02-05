@@ -31,6 +31,10 @@ trait AssertionsTrait
         );
     }
 
+    public function assertNotMatchedRouteName(RouteResult $routeResult, string $expected): void
+    {
+        $this->assertNot(
+            $this->constraintMatchedRouteName($routeResult, $expected),
             $routeResult->getMatchedRouteName()
         );
     }
