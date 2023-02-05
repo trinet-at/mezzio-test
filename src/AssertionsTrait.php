@@ -212,6 +212,14 @@ trait AssertionsTrait
                 static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
                 sprintf('%s::getHeaders()', $response::class)
             ),
+
+    /**
+     * @param array<array<string>|string> $expected
+     */
+    public function assertNotResponseHeaders(ResponseInterface $response, array $expected): void
+    {
+        $this->assertNot(
+            $this->constraintResponseHeaders($response, $expected),
             $response->getHeaders()
         );
     }
