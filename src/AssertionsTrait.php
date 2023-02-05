@@ -96,15 +96,17 @@ trait AssertionsTrait
     }
 
     /**
-     * @param array<string,mixed> $parsedBody
+     * @param array<string,mixed> $expected
      */
-    public function assertSameRequestParsedBody(array $parsedBody): void
+    public function assertRequestParsedBody(ServerRequestInterface $request, array $expected): void
     {
-        Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame(
-            $parsedBody,
-            $this->request->getParsedBody(),
-            'Failed asserting that ParsedBody are identical.'
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getParsedBody()', $request::class)
+            ),
+            $request->getParsedBody()
         );
     }
 
