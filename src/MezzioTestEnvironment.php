@@ -20,10 +20,12 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use Throwable;
-
 use UnexpectedValueException;
+
 use function array_merge;
 use function assert;
+use function get_debug_type;
+use function sprintf;
 
 final class MezzioTestEnvironment extends Assert
 {
@@ -657,11 +659,10 @@ final class MezzioTestEnvironment extends Assert
      */
     private function requirePath(string $suffix = ''): ContainerInterface|Closure
     {
-        /** @var Closure|ContainerInterface $result */
         $result = require $this->basePath . '/config/' . $suffix;
 
         /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void|ContainerInterface */
-        return match(true) {
+        return match (true) {
             ($result instanceof Closure) => /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void */ $result,
             ($result instanceof ContainerInterface) => /** @return ContainerInterface*/ $result,
 
