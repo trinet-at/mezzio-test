@@ -183,14 +183,7 @@ trait AssertionsTrait
 
     public function assertResponseStatusCode(ResponseInterface $response, int $expected): void
     {
-        $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (int $expectedValue, int $actualValue): bool => $expectedValue === $actualValue,
-                $response::class . '::getStatusCode()'
-            ),
-            $response->getStatusCode()
-        );
+        $this->assert($this->constraintResponseStatusCode($response, $expected), $response->getStatusCode());
     }
 
     public function assertRouteMiddlewareOrResponseHandler(
