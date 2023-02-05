@@ -236,6 +236,17 @@ trait AssertionsTrait
         string $middlewareOrResponseHandlerClass
     ): void {
         $matchedRoute = $routeResult->getMatchedRoute();
+    public function assertServerRequestProtocolVersion(ServerRequestInterface $request, array $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getProtocolVersion()', $request::class)
+            ),
+            $request->getProtocolVersion()
+        );
+    }
 
         Assert::assertInstanceOf(Route::class, $matchedRoute);
         $matchedMiddlewareOrResponseHandler = $matchedRoute->getMiddleware();
