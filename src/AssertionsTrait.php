@@ -137,10 +137,21 @@ trait AssertionsTrait
         );
     }
 
-    /**
-     * @param array<array<string>|string> $headers
-     */
-    public function assertSameResponseHeaders(array $headers): void
+    public function assertResponseBodyContainsString(ResponseInterface $response, string $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => str_contains(
+                    $actualValue,
+                    $expectedValue
+                ),
+                sprintf('%s::getBody()', $response::class)
+            ),
+            (string) $response->getBody()
+        );
+    }
+
     {
         Assert::assertInstanceOf(ResponseInterface::class, $this->response);
         Assert::assertSame($headers, $this->response->getHeaders());
