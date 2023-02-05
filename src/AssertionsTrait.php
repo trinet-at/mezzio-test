@@ -181,6 +181,9 @@ trait AssertionsTrait
         );
     }
 
+    /**
+     * @param array<string,mixed> $expected
+     */
     public function assertServerRequestAttributes(ServerRequestInterface $request, array $expected): void
     {
         $this->assert(
@@ -205,6 +208,9 @@ trait AssertionsTrait
         );
     }
 
+    /**
+     * @param array<string,mixed> $expected
+     */
     public function assertServerRequestCookieParams(ServerRequestInterface $request, array $expected): void
     {
         $this->assert(
@@ -288,7 +294,7 @@ trait AssertionsTrait
         );
     }
 
-    public function assertServerRequestProtocolVersion(ServerRequestInterface $request, array $expected): void
+    public function assertServerRequestProtocolVersion(ServerRequestInterface $request, string $expected): void
     {
         $this->assert(
             $this->constraint(
