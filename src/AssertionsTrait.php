@@ -40,6 +40,32 @@ trait AssertionsTrait
         );
     }
 
+    public function assertNotResponseHasHeader(ResponseInterface $response, string $name): void
+    {
+        $this->assertNot($this->constraintResponseHasHeader($response, $name), $response->hasHeader($name));
+    }
+
+    /**
+     * @param array<string> $expected
+     */
+    public function assertNotResponseHeader(ResponseInterface $response, string $name, array $expected = []): void
+    {
+        $this->assertNot($this->constraintResponseHeader($response, $name, $expected), $response->getHeader($name));
+    }
+
+    /**
+     * @param array<array<string>|string> $expected
+     */
+    public function assertNotResponseHeaders(ResponseInterface $response, array $expected): void
+    {
+        $this->assertNot($this->constraintResponseHeaders($response, $expected), $response->getHeaders());
+    }
+
+    public function assertNotResponseReasonPhrase(ResponseInterface $response, string $expected): void
+    {
+        $this->assertNot($this->constraintResponseReasonPhrase($response, $expected), $response->getReasonPhrase());
+    }
+
     public function assertNotResponseStatusCode(ResponseInterface $response, int $expected): void
     {
         $this->assertNot($this->constraintResponseStatusCode($response, $expected), $response->getStatusCode());
@@ -126,41 +152,9 @@ trait AssertionsTrait
         );
     }
 
-    public function constraintResponseBodyContainsString(ResponseInterface $response, string $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => str_contains(
-                $actualValue,
-                $expectedValue
-            ),
-            sprintf('%s::getBody()', $response::class)
-        );
-    }
-
     public function assertResponseHasHeader(ResponseInterface $response, string $name): void
     {
-        $this->assert(
-            $this->constraintResponseHasHeader($response, $name),
-            $response->hasHeader($name)
-        );
-    }
-
-    public function assertNotResponseHasHeader(ResponseInterface $response, string $name): void
-    {
-        $this->assertNot(
-            $this->constraintResponseHasHeader($response, $name),
-            $response->hasHeader($name)
-        );
-    }
-
-    public function constraintResponseHasHeader(ResponseInterface $response, string $name): Constraint
-    {
-        return $this->constraint(
-            true,
-            static fn (bool $expectedValue, bool $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::hasHeader("%s")', $response::class, $name)
-        );
+        $this->assert($this->constraintResponseHasHeader($response, $name), $response->hasHeader($name));
     }
 
     /**
@@ -170,35 +164,7 @@ trait AssertionsTrait
     {
         $this->assertResponseHasHeader($response, $name);
 
-        $this->assert(
-            $this->constraintResponseHeader($response, $name, $expected),
-            $response->getHeader($name)
-        );
-    }
-
-    /**
-     * @param array<string> $expected
-     */
-    public function assertNotResponseHeader(ResponseInterface $response, string $name, array $expected = []): void
-    {
-        $this->assertNotResponseHasHeader($response, $name);
-
-        $this->assertNot(
-            $this->constraintResponseHeader($response, $name, $expected),
-            $response->getHeader($name)
-        );
-    }
-
-    /**
-     * @param array<string> $expected
-     */
-    public function constraintResponseHeader(ResponseInterface $response, string $name, array $expected = []): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getHeader("%s")', $response::class, $name)
-        );
+        $this->assert($this->constraintResponseHeader($response, $name, $expected), $response->getHeader($name));
     }
 
     /**
@@ -206,58 +172,12 @@ trait AssertionsTrait
      */
     public function assertResponseHeaders(ResponseInterface $response, array $expected): void
     {
-        $this->assert(
-            $this->constraintResponseHeaders($response, $expected),
-            $response->getHeaders()
-        );
-    }
-
-    /**
-     * @param array<array<string>|string> $expected
-     */
-    public function assertNotResponseHeaders(ResponseInterface $response, array $expected): void
-    {
-        $this->assertNot(
-            $this->constraintResponseHeaders($response, $expected),
-            $response->getHeaders()
-        );
-    }
-
-    /**
-     * @param array<array<string>|string> $expected
-     */
-    public function constraintResponseHeaders(ResponseInterface $response, array $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getHeaders()', $response::class)
-        );
+        $this->assert($this->constraintResponseHeaders($response, $expected), $response->getHeaders());
     }
 
     public function assertResponseReasonPhrase(ResponseInterface $response, string $expected): void
     {
-        $this->assert(
-            $this->constraintResponseReasonPhrase($response, $expected),
-            $response->getReasonPhrase()
-        );
-    }
-
-    public function assertNotResponseReasonPhrase(ResponseInterface $response, string $expected): void
-    {
-        $this->assertNot(
-            $this->constraintResponseReasonPhrase($response, $expected),
-            $response->getReasonPhrase()
-        );
-    }
-
-    public function constraintResponseReasonPhrase(ResponseInterface $response, string $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getReasonPhrase()', $response::class)
-        );
+        $this->assert($this->constraintResponseReasonPhrase($response, $expected), $response->getReasonPhrase());
     }
 
     public function assertResponseStatusCode(ResponseInterface $response, int $expected): void
@@ -367,8 +287,6 @@ trait AssertionsTrait
      */
     public function assertServerRequestHeader(ServerRequestInterface $request, string $name, array $expected): void
     {
-        $this->assertServerRequestHasHeader($request, $name);
-
         $this->assert(
             $this->constraint(
                 $expected,
@@ -453,6 +371,63 @@ trait AssertionsTrait
             $expected,
             static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
             $response::class . '::getBody()'
+        );
+    }
+
+    public function constraintResponseBodyContainsString(ResponseInterface $response, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => str_contains(
+                $actualValue,
+                $expectedValue
+            ),
+            sprintf('%s::getBody()', $response::class)
+        );
+    }
+
+    public function constraintResponseHasHeader(ResponseInterface $response, string $name): Constraint
+    {
+        return $this->constraint(
+            true,
+            static fn (bool $expectedValue, bool $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::hasHeader("%s")', $response::class, $name)
+        );
+    }
+
+    /**
+     * @param array<string> $expected
+     */
+    public function constraintResponseHeader(
+        ResponseInterface $response,
+        string $name,
+        array $expected = []
+    ): Constraint {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getHeader("%s")', $response::class, $name)
+        );
+    }
+
+    /**
+     * @param array<array<string>|string> $expected
+     */
+    public function constraintResponseHeaders(ResponseInterface $response, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getHeaders()', $response::class)
+        );
+    }
+
+    public function constraintResponseReasonPhrase(ResponseInterface $response, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getReasonPhrase()', $response::class)
         );
     }
 
