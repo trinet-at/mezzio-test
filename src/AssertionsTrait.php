@@ -373,6 +373,15 @@ trait AssertionsTrait
             ),
             $request->getUri()
                 ->getPath()
+    public function constraintResponseBody(ResponseInterface $response, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            $response::class . '::getBody()'
+        );
+    }
+
         );
     }
 
