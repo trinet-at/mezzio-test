@@ -150,6 +150,15 @@ trait AssertionsTrait
         );
     }
 
+    public function constraintResponseHasHeader(ResponseInterface $response, string $name): Constraint
+    {
+        return $this->constraint(
+            true,
+            static fn (bool $expectedValue, bool $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::hasHeader("%s")', $response::class, $name)
+        );
+    }
+
     /**
      * @param array<string> $expected
      */
