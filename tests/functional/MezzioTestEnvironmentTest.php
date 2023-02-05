@@ -368,10 +368,10 @@ final class MezzioTestEnvironmentTest extends TestCase
         $routeResult = $this->mezzio->getRouteResult();
         Assert::assertInstanceOf(RouteResult::class, $routeResult);
 
-        $this->assertRequestMethod($request, $method);
-        $this->assertRequestHeaders($request, $headers);
-        $this->assertRequestQueryParams($request, $queryParams);
-        $this->assertRequestParsedBody($request, $parsedBody);
+        $this->assertServerRequestMethod($request, $method);
+        $this->assertServerRequestHeaders($request, $headers);
+        $this->assertServerRequestQueryParams($request, $queryParams);
+        $this->assertServerRequestParsedBody($request, $parsedBody);
         $this->assertMatchedRouteName($routeResult, self::ROUTE_NAME);
 
         $this->assertResponseBody($response, $body);
@@ -399,15 +399,15 @@ final class MezzioTestEnvironmentTest extends TestCase
         $request = $this->mezzio->getRequest();
         Assert::assertInstanceOf(ServerRequestInterface::class, $request);
 
-        $this->assertRequestMethod($request, RequestMethodInterface::METHOD_DELETE);
+        $this->assertServerRequestMethod($request, RequestMethodInterface::METHOD_DELETE);
 
         $this->assertResponseBody($response, http_build_query($payload));
-        $this->assertRequestHeaders($request, []);
+        $this->assertServerRequestHeaders($request, []);
         $this->assertResponseHeaders($response, [
             'content-type' => ['text/plain; charset=utf-8'],
         ]);
-        $this->assertRequestQueryParams($request, []);
-        $this->assertRequestParsedBody($request, $payload);
+        $this->assertServerRequestQueryParams($request, []);
+        $this->assertServerRequestParsedBody($request, $payload);
 
         $routeResult = $this->mezzio->getRouteResult();
         Assert::assertInstanceOf(RouteResult::class, $routeResult);
@@ -429,10 +429,10 @@ final class MezzioTestEnvironmentTest extends TestCase
         $request = $this->mezzio->getRequest();
         Assert::assertInstanceOf(ServerRequestInterface::class, $request);
 
-        $this->assertRequestQueryParams($request, []);
-        $this->assertRequestParsedBody($request, $payload);
-        $this->assertRequestHeaders($request, self::JSON_HEADERS);
-        $this->assertRequestMethod($request, RequestMethodInterface::METHOD_DELETE);
+        $this->assertServerRequestQueryParams($request, []);
+        $this->assertServerRequestParsedBody($request, $payload);
+        $this->assertServerRequestHeaders($request, self::JSON_HEADERS);
+        $this->assertServerRequestMethod($request, RequestMethodInterface::METHOD_DELETE);
 
         $routeResult = $this->mezzio->getRouteResult();
         Assert::assertInstanceOf(RouteResult::class, $routeResult);
@@ -487,11 +487,11 @@ final class MezzioTestEnvironmentTest extends TestCase
         $request = $this->mezzio->getRequest();
         Assert::assertInstanceOf(ServerRequestInterface::class, $request);
 
-        $this->assertRequestHeaders($request, $expected);
+        $this->assertServerRequestHeaders($request, $expected);
         $this->assertResponseStatusCode($response, StatusCodeInterface::STATUS_OK);
         $this->assertResponseBody($response, 'Hi');
-        $this->assertRequestHasHeader($request, 'foo');
-        $this->assertRequestHeaderMatches($request, 'foo', ['bar']);
+        $this->assertServerRequestHasHeader($request, 'foo');
+        $this->assertServerRequestHeader($request, 'foo', ['bar']);
     }
 
     public function testDispatchParamsArePassedToParsedBodyForPostRequest(): void
@@ -509,7 +509,7 @@ final class MezzioTestEnvironmentTest extends TestCase
 
         $this->assertMatchedRouteName($routeResult, 'crud');
         $this->assertRouteMiddlewareOrResponseHandler($routeResult, RequestHandlerMiddleware::class);
-        $this->assertRequestParsedBody($request, $params);
+        $this->assertServerRequestParsedBody($request, $params);
         $this->assertResponseBody($response, http_build_query($params));
     }
 
@@ -526,7 +526,7 @@ final class MezzioTestEnvironmentTest extends TestCase
         $routeResult = $this->mezzio->getRouteResult();
         Assert::assertInstanceOf(RouteResult::class, $routeResult);
 
-        $this->assertRequestQueryParams($request, $params);
+        $this->assertServerRequestQueryParams($request, $params);
         $this->assertResponseBody($response, 'Hi');
     }
 

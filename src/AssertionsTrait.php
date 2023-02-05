@@ -201,7 +201,7 @@ trait AssertionsTrait
                 static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
                 sprintf('%s::getBody()', $request::class)
             ),
-            (string) $request->getBody()
+            (string)$request->getBody()
         );
     }
 
@@ -327,18 +327,6 @@ trait AssertionsTrait
         );
     }
 
-    public function assertServerRequestUriPath(ServerRequestInterface $request, string $expected): void
-    {
-        $this->assert(
-            $this->constraint(
-                $expected,
-                static fn(string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getRequestTarget()', $request::class)
-            ),
-            $request->getUri()->getPath()
-        );
-    }
-
     /**
      * @param array<UploadedFileInterface> $expected
      */
@@ -351,6 +339,19 @@ trait AssertionsTrait
                 sprintf('%s::getUploadedFiles()', $request::class)
             ),
             $request->getUploadedFiles()
+        );
+    }
+
+    public function assertServerRequestUriPath(ServerRequestInterface $request, string $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getRequestTarget()', $request::class)
+            ),
+            $request->getUri()
+                ->getPath()
         );
     }
 
