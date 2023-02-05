@@ -181,6 +181,18 @@ trait AssertionsTrait
     }
 
     /**
+     * @param array<string> $expected
+     */
+    public function constraintResponseHeader(ResponseInterface $response, string $name, array $expected = []): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getHeader("%s")', $response::class, $name)
+        );
+    }
+
+    /**
      * @param array<array<string>|string> $expected
      */
     public function assertResponseHeaders(ResponseInterface $response, array $expected): void
