@@ -406,6 +406,12 @@ trait AssertionsTrait
         );
     }
 
+    public function constraintServerRequestUriPath(ServerRequestInterface $request, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getRequestTarget()', $request::class)
         );
     }
 
