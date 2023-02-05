@@ -365,11 +365,7 @@ trait AssertionsTrait
     public function assertServerRequestUploadedFiles(ServerRequestInterface $request, array $expected): void
     {
         $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getUploadedFiles()', $request::class)
-            ),
+            $this->constraintServerRequestUploadedFiles($request, $expected),
             $request->getUploadedFiles()
         );
     }
