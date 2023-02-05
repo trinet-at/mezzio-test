@@ -307,6 +307,8 @@ final class MezzioTestEnvironment extends Assert
                 RequestMethodInterface::METHOD_HEAD,
                 $uri,
                 $queryParams,
+                [],
+                [],
                 $headers,
                 $cookieParams,
                 $serverParams
@@ -657,14 +659,15 @@ final class MezzioTestEnvironment extends Assert
     /**
      * @psalm-suppress UnresolvableInclude
      *
-     * @return Closure(Application,MiddlewareFactory,ContainerInterface)|ContainerInterface
+     * @param string $suffix
+     * @return Closure(Application,MiddlewareFactory,ContainerInterface):void|ContainerInterface
      */
     private function requirePath(string $suffix = ''): ContainerInterface|Closure
     {
         /** @var Closure|ContainerInterface $result */
         $result = require $this->basePath . '/config/' . $suffix;
         if ($result instanceof Closure) {
-            /** @var Closure(Application,MiddlewareFactory,ContainerInterface) $result */
+            /** @var Closure(Application,MiddlewareFactory,ContainerInterface):void $result */
             return $result;
         }
         return $result;
