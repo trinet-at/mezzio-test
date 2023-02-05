@@ -365,155 +365,6 @@ trait AssertionsTrait
         $this->assert($this->constraintServerRequestUriPath($request, $expected), $request->getUri()->getPath());
     }
 
-    public function constraintResponseBody(ResponseInterface $response, string $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-            $response::class . '::getBody()'
-        );
-    }
-
-    public function constraintResponseBodyContainsString(ResponseInterface $response, string $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => str_contains(
-                $actualValue,
-                $expectedValue
-            ),
-            sprintf('%s::getBody()', $response::class)
-        );
-    }
-
-    public function constraintResponseHasHeader(ResponseInterface $response, string $name): Constraint
-    {
-        return $this->constraint(
-            true,
-            static fn (bool $expectedValue, bool $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::hasHeader("%s")', $response::class, $name)
-        );
-    }
-
-    /**
-     * @param array<string> $expected
-     */
-    public function constraintResponseHeader(
-        ResponseInterface $response,
-        string $name,
-        array $expected = []
-    ): Constraint {
-        return $this->constraint(
-            $expected,
-            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getHeader("%s")', $response::class, $name)
-        );
-    }
-
-    /**
-     * @param array<array<string>|string> $expected
-     */
-    public function constraintResponseHeaders(ResponseInterface $response, array $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getHeaders()', $response::class)
-        );
-    }
-
-    public function constraintResponseReasonPhrase(ResponseInterface $response, string $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getReasonPhrase()', $response::class)
-        );
-    }
-
-    public function constraintResponseStatusCode(ResponseInterface $response, int $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (int $expectedValue, int $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getStatusCode()', $response::class)
-        );
-    }
-
-    public function constraintServerRequestMethod(ServerRequestInterface $request, string $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getMethod()', $request::class)
-        );
-    }
-
-    /**
-     * @param array<string,mixed> $expected
-     */
-    public function constraintServerRequestParsedBody(ServerRequestInterface $request, array $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getParsedBody()', $request::class)
-        );
-    }
-
-    public function constraintServerRequestProtocolVersion(
-        ServerRequestInterface $request,
-        string $expected
-    ): Constraint {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getProtocolVersion()', $request::class)
-        );
-    }
-
-    /**
-     * @param array<string,mixed> $expected
-     */
-    public function constraintServerRequestQueryParams(ServerRequestInterface $request, array $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getQueryParams()', $request::class)
-        );
-    }
-
-    public function constraintServerRequestRequestTarget(ServerRequestInterface $request, string $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getRequestTarget()', $request::class)
-        );
-    }
-
-    /**
-     * @param array<UploadedFileInterface> $expected
-     */
-    public function constraintServerRequestUploadedFiles(ServerRequestInterface $request, array $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getUploadedFiles()', $request::class)
-        );
-    }
-
-    public function constraintServerRequestUriPath(ServerRequestInterface $request, string $expected): Constraint
-    {
-        return $this->constraint(
-            $expected,
-            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-            sprintf('%s::getRequestTarget()', $request::class)
-        );
-    }
-
     private function assert(Constraint $constraint, mixed $actual): void
     {
         Assert::assertThat($actual, $constraint);
@@ -587,6 +438,155 @@ trait AssertionsTrait
             $expected,
             static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
             sprintf('%s::getMatchedRouteName()', $routeResult::class)
+        );
+    }
+
+    private function constraintResponseBody(ResponseInterface $response, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            $response::class . '::getBody()'
+        );
+    }
+
+    private function constraintResponseBodyContainsString(ResponseInterface $response, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => str_contains(
+                $actualValue,
+                $expectedValue
+            ),
+            sprintf('%s::getBody()', $response::class)
+        );
+    }
+
+    private function constraintResponseHasHeader(ResponseInterface $response, string $name): Constraint
+    {
+        return $this->constraint(
+            true,
+            static fn (bool $expectedValue, bool $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::hasHeader("%s")', $response::class, $name)
+        );
+    }
+
+    /**
+     * @param array<string> $expected
+     */
+    private function constraintResponseHeader(
+        ResponseInterface $response,
+        string $name,
+        array $expected = []
+    ): Constraint {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getHeader("%s")', $response::class, $name)
+        );
+    }
+
+    /**
+     * @param array<array<string>|string> $expected
+     */
+    private function constraintResponseHeaders(ResponseInterface $response, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getHeaders()', $response::class)
+        );
+    }
+
+    private function constraintResponseReasonPhrase(ResponseInterface $response, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getReasonPhrase()', $response::class)
+        );
+    }
+
+    private function constraintResponseStatusCode(ResponseInterface $response, int $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (int $expectedValue, int $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getStatusCode()', $response::class)
+        );
+    }
+
+    private function constraintServerRequestMethod(ServerRequestInterface $request, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getMethod()', $request::class)
+        );
+    }
+
+    /**
+     * @param array<string,mixed> $expected
+     */
+    private function constraintServerRequestParsedBody(ServerRequestInterface $request, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getParsedBody()', $request::class)
+        );
+    }
+
+    private function constraintServerRequestProtocolVersion(
+        ServerRequestInterface $request,
+        string $expected
+    ): Constraint {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getProtocolVersion()', $request::class)
+        );
+    }
+
+    /**
+     * @param array<string,mixed> $expected
+     */
+    private function constraintServerRequestQueryParams(ServerRequestInterface $request, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getQueryParams()', $request::class)
+        );
+    }
+
+    private function constraintServerRequestRequestTarget(ServerRequestInterface $request, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getRequestTarget()', $request::class)
+        );
+    }
+
+    /**
+     * @param array<UploadedFileInterface> $expected
+     */
+    private function constraintServerRequestUploadedFiles(ServerRequestInterface $request, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getUploadedFiles()', $request::class)
+        );
+    }
+
+    private function constraintServerRequestUriPath(ServerRequestInterface $request, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getRequestTarget()', $request::class)
         );
     }
 }
