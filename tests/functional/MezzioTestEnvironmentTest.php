@@ -78,7 +78,7 @@ final class MezzioTestEnvironmentTest extends TestCase
         $response = $this->mezzio->dispatch('/');
 
         $this->assertResponseBody($response, 'Hi');
-        self::assertSame(200, $this->mezzio->getResponseStatusCode());
+
         $this->assertResponseStatusCode($response, StatusCodeInterface::STATUS_OK);
         $this->assertNotResponseStatusCode($response, StatusCodeInterface::STATUS_NOT_FOUND);
         $this->assertResponseReasonPhrase($response, 'OK');
