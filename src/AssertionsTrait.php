@@ -202,10 +202,18 @@ trait AssertionsTrait
         );
     }
 
-    public function assertSameRouteMiddlewareOrResponseHandler(string $middlewareOrResponseHandlerClass): void
+    public function assertResponseStatusCode(ResponseInterface $response, int $expected): void
     {
-        Assert::assertInstanceOf(RouteResult::class, $this->routeResult);
-        $matchedRoute = $this->routeResult->getMatchedRoute();
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (int $expectedValue, int $actualValue): bool => $expectedValue === $actualValue,
+                $response::class . '::getStatusCode()'
+            ),
+            $response->getStatusCode()
+        );
+    }
+
 
         Assert::assertInstanceOf(Route::class, $matchedRoute);
         $matchedMiddlewareOrResponseHandler = $matchedRoute->getMiddleware();
