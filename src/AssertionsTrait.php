@@ -77,6 +77,14 @@ trait AssertionsTrait
         );
     }
 
+    public function assertNotServerRequestRequestTarget(ServerRequestInterface $request, string $expected): void
+    {
+        $this->assertNot(
+            $this->constraintServerRequestRequestTarget($request, $expected),
+            $request->getRequestTarget()
+        );
+    }
+
         );
     }
 
