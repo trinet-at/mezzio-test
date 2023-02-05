@@ -85,6 +85,14 @@ trait AssertionsTrait
         );
     }
 
+    /**
+     * @param array<UploadedFileInterface> $expected
+     */
+    public function assertNotServerRequestUploadedFiles(ServerRequestInterface $request, array $expected): void
+    {
+        $this->assertNot(
+            $this->constraintServerRequestUploadedFiles($request, $expected),
+            $request->getUploadedFiles()
         );
     }
 
