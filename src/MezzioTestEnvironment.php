@@ -63,10 +63,7 @@ final class MezzioTestEnvironment extends Assert
 
         $this->router = $this->container->get(RouterInterface::class);
 
-        /** @var MiddlewareFactory $middlewareFactory */
-        $middlewareFactory = $this->container->get(MiddlewareFactory::class);
-        ($this->requireClosure('pipeline.php'))($this->application, $middlewareFactory, $this->container);
-        ($this->requireClosure('routes.php'))($this->application, $middlewareFactory, $this->container);
+        $this->requireClosure('pipeline.php', 'routes.php');
 
         // Attach an ErrorListener to the ErrorHandler
         if (! $this->container->has(ErrorHandler::class)) {
@@ -619,11 +616,15 @@ final class MezzioTestEnvironment extends Assert
         );
     }
 
-    private function requireClosure(string $path): Closure
+    private function requireClosure(string ...$paths): void
     {
-        $result = $this->requirePath($path);
-        assert($result instanceof Closure);
-        return $result;
+        /** @var MiddlewareFactory $middlewareFactory */
+        $middlewareFactory = $this->container->get(MiddlewareFactory::class);
+        foreach ($paths as $path) {
+            $result = $this->requirePath($path);
+            assert($result instanceof Closure);
+            $result($this->application, $middlewareFactory, $this->container);
+        }
     }
 
     private function requireContainer(): ContainerInterface
