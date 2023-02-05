@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace Trinet\MezzioTest;
 
+use Closure;
 use Mezzio\Middleware\LazyLoadingMiddleware;
 use Mezzio\Router\Route;
 use Mezzio\Router\RouteResult;
 use PHPUnit\Framework\Assert;
-use Psr\Http\Message\RequestInterface;
+use PHPUnit\Framework\Constraint\Constraint;
+use PHPUnit\Framework\Constraint\LogicalNot;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionClass;
+use SebastianBergmann\Comparator\ComparisonFailure;
 
-use function assert;
 use function sprintf;
+use function str_contains;
 
 trait AssertionsTrait
 {
-    public function assertResponseBodyContainsString(string $string): void
     public function assertMatchedRouteName(RouteResult $routeResult, string $expected): void
     {
         $this->assert(
@@ -148,7 +151,7 @@ trait AssertionsTrait
                 ),
                 sprintf('%s::getBody()', $response::class)
             ),
-            (string) $response->getBody()
+            (string)$response->getBody()
         );
     }
 
@@ -270,7 +273,7 @@ trait AssertionsTrait
         Closure $assertion,
         string $message = ' matches the expected result.'
     ): Constraint {
-        return new class($expected, $message, $assertion) extends Constraint {
+        return new class ($expected, $message, $assertion) extends Constraint {
             public function __construct(
                 private mixed $expected,
                 private string $message,
