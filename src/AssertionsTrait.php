@@ -181,14 +181,15 @@ trait AssertionsTrait
         );
     }
 
+    public function assertServerRequestAttributes(ServerRequestInterface $request, array $expected): void
     {
         $this->assert(
             $this->constraint(
                 $expected,
                 static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getQueryParams()', $request::class)
+                sprintf('%s::getAttributes()', $request::class)
             ),
-            $request->getQueryParams()
+            $request->getAttributes()
         );
     }
 
