@@ -205,18 +205,15 @@ trait AssertionsTrait
         );
     }
 
-    public function assertResponseBodyContainsString(ResponseInterface $response, string $expected): void
+    public function assertServerRequestCookieParams(ServerRequestInterface $request, array $expected): void
     {
         $this->assert(
             $this->constraint(
                 $expected,
-                static fn (string $expectedValue, string $actualValue): bool => str_contains(
-                    $actualValue,
-                    $expectedValue
-                ),
-                sprintf('%s::getBody()', $response::class)
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getCookieParams()', $request::class)
             ),
-            (string)$response->getBody()
+            $request->getCookieParams()
         );
     }
 
