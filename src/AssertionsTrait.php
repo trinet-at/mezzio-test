@@ -58,14 +58,11 @@ trait AssertionsTrait
         $this->assertNot($this->constraintServerRequestParsedBody($request, $expected), $request->getParsedBody());
     }
 
+    public function assertNotServerRequestProtocolVersion(ServerRequestInterface $request, string $expected): void
     {
         $this->assertNot(
-            $this->constraint(
-                $expected,
-                static fn (int $expectedValue, int $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getStatusCode()', $response::class)
-            ),
-            $response->getStatusCode()
+            $this->constraintServerRequestProtocolVersion($request, $expected),
+            $request->getProtocolVersion()
         );
     }
 
