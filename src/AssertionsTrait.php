@@ -216,6 +216,18 @@ trait AssertionsTrait
         );
     }
 
+    /**
+     * @param array<array<string>|string> $expected
+     */
+    public function constraintResponseHeaders(ResponseInterface $response, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getHeaders()', $response::class)
+        );
+    }
+
     public function assertResponseReasonPhrase(ResponseInterface $response, string $expected): void
     {
         $this->assert(
