@@ -193,15 +193,15 @@ trait AssertionsTrait
         );
     }
 
-    public function assertResponseBody(ResponseInterface $response, string $expected): void
+    public function assertServerRequestBody(ServerRequestInterface $request, string $expected): void
     {
         $this->assert(
             $this->constraint(
                 $expected,
                 static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                $response::class . '::getBody()'
+                sprintf('%s::getBody()', $request::class)
             ),
-            (string)$response->getBody()
+            (string) $request->getBody()
         );
     }
 
