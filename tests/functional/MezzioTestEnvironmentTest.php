@@ -429,7 +429,10 @@ final class MezzioTestEnvironmentTest extends TestCase
         $request = $this->mezzio->getRequest();
         Assert::assertInstanceOf(ServerRequestInterface::class, $request);
 
+        $this->assertServerRequestBody($request, '');
         $this->assertServerRequestQueryParams($request, []);
+        $this->assertServerRequestAttributes($request, []);
+        $this->assertServerRequestCookieParams($request, []);
         $this->assertServerRequestParsedBody($request, $payload);
         $this->assertServerRequestHeaders($request, self::JSON_HEADERS);
         $this->assertServerRequestMethod($request, RequestMethodInterface::METHOD_DELETE);

@@ -158,11 +158,13 @@ trait AssertionsTrait
 
         /** @var class-string $matchedMiddlewareOrResponseHandlerName */
         $matchedMiddlewareOrResponseHandlerName = match (true) {
-            ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) => (new ReflectionClass(
-                $matchedMiddlewareOrResponseHandler
-            ))
-                ->getProperty('middlewareName')
-                ->getValue($matchedMiddlewareOrResponseHandler),
+            ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) => (static function () use ($matchedMiddlewareOrResponseHandler): string {
+                    $property = (new ReflectionClass($matchedMiddlewareOrResponseHandler))->getProperty('middlewareName');
+
+                    $property->setAccessible(true);
+
+                    return $property->getValue($matchedMiddlewareOrResponseHandler);
+            })(),
             default => $matchedMiddlewareOrResponseHandler::class
         };
 
