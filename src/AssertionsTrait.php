@@ -239,6 +239,20 @@ trait AssertionsTrait
 
         Assert::assertInstanceOf(Route::class, $matchedRoute);
         $matchedMiddlewareOrResponseHandler = $matchedRoute->getMiddleware();
+    /**
+     * @param array<string,mixed> $expected
+     */
+    public function assertServerRequestQueryParams(ServerRequestInterface $request, array $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getQueryParams()', $request::class)
+            ),
+            $request->getQueryParams()
+        );
+    }
 
         /** @var class-string $matchedMiddlewareOrResponseHandlerName */
         $matchedMiddlewareOrResponseHandlerName = match (true) {
