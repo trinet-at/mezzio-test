@@ -66,15 +66,17 @@ trait AssertionsTrait
         );
     }
 
-    public function assertResponseBody(ResponseInterface $response, string $expected): void
+    /**
+     * @param array<string,mixed> $expected
+     */
+    public function assertNotServerRequestQueryParams(ServerRequestInterface $request, array $expected): void
     {
-        $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                $response::class . '::getBody()'
-            ),
-            (string)$response->getBody()
+        $this->assertNot(
+            $this->constraintServerRequestQueryParams($request, $expected),
+            $request->getQueryParams()
+        );
+    }
+
         );
     }
 
