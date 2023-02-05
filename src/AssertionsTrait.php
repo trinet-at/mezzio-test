@@ -125,6 +125,18 @@ trait AssertionsTrait
         );
     }
 
+    public function constraintResponseBodyContainsString(ResponseInterface $response, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => str_contains(
+                $actualValue,
+                $expectedValue
+            ),
+            sprintf('%s::getBody()', $response::class)
+        );
+    }
+
     public function assertResponseHasHeader(ResponseInterface $response, string $name): void
     {
         $this->assert(
