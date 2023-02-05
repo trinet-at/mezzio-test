@@ -50,6 +50,14 @@ trait AssertionsTrait
         $this->assertNot($this->constraintServerRequestMethod($request, $expected), $request->getMethod());
     }
 
+    /**
+     * @param array<string,mixed> $expected
+     */
+    public function assertNotServerRequestParsedBody(ServerRequestInterface $request, array $expected): void
+    {
+        $this->assertNot($this->constraintServerRequestParsedBody($request, $expected), $request->getParsedBody());
+    }
+
     {
         $this->assertNot(
             $this->constraint(
