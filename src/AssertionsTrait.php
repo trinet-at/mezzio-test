@@ -253,4 +253,9 @@ trait AssertionsTrait
         Assert::assertThat($actual, $constraint);
     }
 
+    private function assertNot(Constraint $constraint, mixed $actual): void
+    {
+        $this->assert(new LogicalNot($constraint), $actual);
+    }
+
 }
