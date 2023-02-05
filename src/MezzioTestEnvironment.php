@@ -97,12 +97,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_DELETE,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_DELETE,
+                $uri,
+                [],
+                $parsedBody,
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -124,12 +126,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->requestJson(
-                method: RequestMethodInterface::METHOD_DELETE,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_DELETE,
+                $uri,
+                [],
+                $parsedBody,
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -148,11 +152,12 @@ final class MezzioTestEnvironment extends Assert
         $withParsedBody = $method !== RequestMethodInterface::METHOD_GET ? $params : [];
 
         $request = $this->request(
-            method: $method,
-            uri: $uri,
-            queryParams: $withQueryParams,
-            parsedBody: $withParsedBody,
-            headers: $headers
+            $method,
+            $uri,
+            $withQueryParams,
+            $withParsedBody,
+            [],
+            $headers
         );
         return $this->dispatchRequest($request);
     }
@@ -211,12 +216,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_GET,
-                uri: $uri,
-                queryParams: $queryParams,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_GET,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -248,12 +255,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->requestJson(
-                method: RequestMethodInterface::METHOD_GET,
-                uri: $uri,
-                queryParams: $queryParams,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_GET,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -295,12 +304,12 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_HEAD,
-                uri: $uri,
-                queryParams: $queryParams,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_HEAD,
+                $uri,
+                $queryParams,
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -330,12 +339,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_OPTIONS,
-                uri: $uri,
-                queryParams: $queryParams,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_OPTIONS,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -357,12 +368,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->requestJson(
-                method: RequestMethodInterface::METHOD_OPTIONS,
-                uri: $uri,
-                queryParams: $queryParams,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_OPTIONS,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -386,13 +399,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_PATCH,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                uploadedFiles: $uploadedFiles,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_PATCH,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -416,13 +430,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->requestJson(
-                method: RequestMethodInterface::METHOD_PATCH,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                uploadedFiles: $uploadedFiles,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_PATCH,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -446,13 +461,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_POST,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                uploadedFiles: $uploadedFiles,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_POST,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -476,13 +492,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->requestJson(
-                method: RequestMethodInterface::METHOD_POST,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                uploadedFiles: $uploadedFiles,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_POST,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -506,13 +523,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->request(
-                method: RequestMethodInterface::METHOD_PUT,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                uploadedFiles: $uploadedFiles,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_PUT,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -536,13 +554,14 @@ final class MezzioTestEnvironment extends Assert
     ): ResponseInterface {
         return $this->dispatchRequest(
             $this->requestJson(
-                method: RequestMethodInterface::METHOD_PUT,
-                uri: $uri,
-                parsedBody: $parsedBody,
-                uploadedFiles: $uploadedFiles,
-                headers: $headers,
-                cookieParams: $cookieParams,
-                serverParams: $serverParams
+                RequestMethodInterface::METHOD_PUT,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
             )
         );
     }
@@ -568,14 +587,15 @@ final class MezzioTestEnvironment extends Assert
         array $serverParams = [],
     ): ServerRequestInterface {
         return $this->request = new ServerRequest(
-            serverParams: $serverParams,
-            uploadedFiles: $uploadedFiles,
-            uri: $uri,
-            method: $method,
-            headers: $headers,
-            cookieParams: $cookieParams,
-            queryParams: $queryParams,
-            parsedBody: $parsedBody,
+            $serverParams,
+            $uploadedFiles,
+            $uri,
+            $method,
+            'php://input',
+            $headers,
+            $cookieParams,
+            $queryParams,
+            $parsedBody,
         );
     }
 
@@ -605,14 +625,14 @@ final class MezzioTestEnvironment extends Assert
         ]);
 
         return $this->request(
-            method: $method,
-            uri: $uri,
-            queryParams: $queryParams,
-            parsedBody: $parsedBody,
-            uploadedFiles: $uploadedFiles,
-            headers: $headers,
-            cookieParams: $cookieParams,
-            serverParams: $serverParams,
+            $method,
+            $uri,
+            $queryParams,
+            $parsedBody,
+            $uploadedFiles,
+            $headers,
+            $cookieParams,
+            $serverParams,
         );
     }
 
