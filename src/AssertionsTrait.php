@@ -207,15 +207,15 @@ trait AssertionsTrait
         );
     }
 
-    public function assertResponseReasonPhrase(ResponseInterface $response, string $expected): void
+    public function assertServerRequestMethod(ServerRequestInterface $request, string $expected): void
     {
         $this->assert(
             $this->constraint(
                 $expected,
                 static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getReasonPhrase()', $response::class)
+                sprintf('%s::getMethod()', $request::class)
             ),
-            $response->getReasonPhrase()
+            $request->getMethod()
         );
     }
 
