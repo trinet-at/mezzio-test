@@ -123,15 +123,15 @@ trait AssertionsTrait
         );
     }
 
-    public function assertRequestMethod(ServerRequestInterface $request, string $expected): void
+    public function assertResponseReasonPhrase(ResponseInterface $response, string $expected): void
     {
         $this->assert(
             $this->constraint(
                 $expected,
                 static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getMethod()', $request::class)
+                sprintf('%s::getReasonPhrase()', $response::class)
             ),
-            $request->getMethod()
+            $response->getReasonPhrase()
         );
     }
 
