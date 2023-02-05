@@ -332,14 +332,7 @@ trait AssertionsTrait
      */
     public function assertServerRequestParsedBody(ServerRequestInterface $request, array $expected): void
     {
-        $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getParsedBody()', $request::class)
-            ),
-            $request->getParsedBody()
-        );
+        $this->assert($this->constraintServerRequestParsedBody($request, $expected), $request->getParsedBody());
     }
 
     public function assertServerRequestProtocolVersion(ServerRequestInterface $request, string $expected): void
