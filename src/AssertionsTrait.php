@@ -171,11 +171,10 @@ trait AssertionsTrait
         $this->assertResponseHasHeader($response, $name);
 
         $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getHeader("%s")', $response::class, $name)
-            ),
+            $this->constraintResponseHeader($response, $name, $expected),
+            $response->getHeader($name)
+        );
+    }
 
     /**
      * @param array<string> $expected
