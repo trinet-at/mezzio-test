@@ -64,6 +64,21 @@ trait AssertionsTrait
         );
     }
 
+    public function assertResponseBodyContainsString(ResponseInterface $response, string $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => str_contains(
+                    $actualValue,
+                    $expectedValue
+                ),
+                sprintf('%s::getBody()', $response::class)
+            ),
+            (string)$response->getBody()
+        );
+    }
+
     {
         $this->assert(
             $this->constraint(
