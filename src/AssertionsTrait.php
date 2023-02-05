@@ -147,10 +147,40 @@ trait AssertionsTrait
         );
     }
 
-    /**
-     * @param array<string,mixed> $expected
-     */
-    public function assertRequestQueryParams(ServerRequestInterface $request, array $expected): void
+    public function assertRouteMiddlewareOrResponseHandler(
+        RouteResult $routeResult,
+        string $middlewareOrResponseHandlerClass
+    ): void {
+        $matchedRoute = $routeResult->getMatchedRoute();
+
+        Assert::assertInstanceOf(Route::class, $matchedRoute);
+        $matchedMiddlewareOrResponseHandler = $matchedRoute->getMiddleware();
+
+        /** @var class-string $matchedMiddlewareOrResponseHandlerName */
+        $matchedMiddlewareOrResponseHandlerName = match (true) {
+            ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) => (new ReflectionClass(
+                $matchedMiddlewareOrResponseHandler
+            ))
+                ->getProperty('middlewareName')
+                ->getValue($matchedMiddlewareOrResponseHandler),
+            default => $matchedMiddlewareOrResponseHandler::class
+        };
+
+        Assert::assertSame($middlewareOrResponseHandlerClass, $matchedMiddlewareOrResponseHandlerName);
+        $reflection = new ReflectionClass($matchedMiddlewareOrResponseHandlerName);
+
+        Assert::assertTrue(
+            $reflection->implementsInterface(MiddlewareInterface::class) ||
+            $reflection->implementsInterface(RequestHandlerInterface::class),
+            sprintf(
+                'Class "%s" does not implement "%s" or "%s".',
+                $matchedMiddlewareOrResponseHandlerName,
+                MiddlewareInterface::class,
+                RequestHandlerInterface::class
+            )
+        );
+    }
+
     {
         $this->assert(
             $this->constraint(
