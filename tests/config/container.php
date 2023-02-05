@@ -8,7 +8,7 @@ use Laminas\ServiceManager\ServiceManager;
 /** @var array<string,array<string>> $config */
 $config = require __DIR__ . '/config.php';
 
-/** @var array<string,array<string>> $dependencies */
+/** @var array{string?: mixed} $dependencies */
 $dependencies = $config['dependencies'];
 $dependencies['services']['config'] = $config;
 

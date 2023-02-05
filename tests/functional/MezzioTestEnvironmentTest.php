@@ -85,23 +85,6 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio = new MezzioTestEnvironment($basePath);
     }
 
-    /**
-     * @return Generator<string,
-     *      array<
-     *          string,
-     *          string,
-     *          array<string,string>,
-     *          array<string,string>,
-     *          array<never,UploadedFileInterface>,
-     *          string,
-     *          array<string,array<string>>>,
-     *          array<never,never>,
-     *          array<never,never>
-     *      >,
-     *      mixed,
-     *      void
-     * >
-     */
     public function crudDataProvider(): Generator
     {
         $emptyQueryParams = [];

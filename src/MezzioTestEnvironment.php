@@ -59,10 +59,8 @@ final class MezzioTestEnvironment extends Assert
 
         $this->container = $this->requireContainer();
 
-        /** @var Application $this->application */
         $this->application = $this->container->get(Application::class);
 
-        /** @var RouterInterface $this->router */
         $this->router = $this->container->get(RouterInterface::class);
 
         /** @var MiddlewareFactory $middlewareFactory */
