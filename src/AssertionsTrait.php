@@ -248,4 +248,9 @@ trait AssertionsTrait
         );
     }
 
+    private function assert(Constraint $constraint, mixed $actual): void
+    {
+        Assert::assertThat($actual, $constraint);
+    }
+
 }
