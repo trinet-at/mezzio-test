@@ -20,6 +20,18 @@ use function sprintf;
 trait AssertionsTrait
 {
     public function assertResponseBodyContainsString(string $string): void
+    public function assertMatchedRouteName(RouteResult $routeResult, string $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getMatchedRouteName()', $routeResult::class)
+            ),
+            $routeResult->getMatchedRouteName()
+        );
+    }
+
     {
         Assert::assertInstanceOf(ResponseInterface::class, $this->response);
         Assert::assertStringContainsString($string, (string)$this->response->getBody());
