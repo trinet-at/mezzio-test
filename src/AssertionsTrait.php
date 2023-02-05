@@ -96,6 +96,15 @@ trait AssertionsTrait
         );
     }
 
+    public function assertNotServerRequestUriPath(ServerRequestInterface $request, string $expected): void
+    {
+        $this->assertNot(
+            $this->constraintServerRequestUriPath($request, $expected),
+            $request->getUri()
+                ->getPath()
+        );
+    }
+
     public function assertResponseBodyContainsString(ResponseInterface $response, string $expected): void
     {
         $this->assert(
