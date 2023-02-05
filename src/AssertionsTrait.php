@@ -317,14 +317,7 @@ trait AssertionsTrait
 
     public function assertServerRequestMethod(ServerRequestInterface $request, string $expected): void
     {
-        $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getMethod()', $request::class)
-            ),
-            $request->getMethod()
-        );
+        $this->assert($this->constraintServerRequestMethod($request, $expected), $request->getMethod());
     }
 
     /**
