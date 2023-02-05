@@ -258,4 +258,60 @@ trait AssertionsTrait
         $this->assert(new LogicalNot($constraint), $actual);
     }
 
+    /**
+     * @template TExpected
+     * @template TActual
+     *
+     * @param TExpected                       $expected
+     * @param Closure(TExpected,TActual):bool $assertion
+     */
+    private function constraint(
+        mixed $expected,
+        Closure $assertion,
+        string $message = ' matches the expected result.'
+    ): Constraint {
+        return new class($expected, $message, $assertion) extends Constraint {
+            public function __construct(
+                private mixed $expected,
+                private string $message,
+                private Closure $assertion,
+            ) {
+            }
+
+            /**
+             * @param TActual $other
+             */
+            protected function matches(mixed $other): bool
+            {
+                return match (true) {
+                    ($this->assertion)($this->expected, $other) => true,
+                    default => false
+                };
+            }
+
+            /**
+             * @param TActual $other
+             */
+            protected function failureDescription(mixed $other): string
+            {
+                $comparisonFailure = new ComparisonFailure(
+                    $this->expected,
+                    $other,
+                    $this->exporter()
+                        ->export($this->expected),
+                    $this->exporter()
+                        ->export($other),
+                    true,
+                    $this->message . ' matches the expected result.'
+                );
+
+                return $comparisonFailure->toString();
+            }
+
+            public function toString(): string
+            {
+                return self::class;
+            }
+        };
+    }
 }
