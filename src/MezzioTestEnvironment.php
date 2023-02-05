@@ -663,8 +663,10 @@ final class MezzioTestEnvironment extends Assert
 
         /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void|ContainerInterface */
         return match (true) {
-            ($result instanceof Closure) => /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void */ $result,
-            ($result instanceof ContainerInterface) => /** @return ContainerInterface*/ $result,
+            ($result instanceof Closure) =>
+                /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void */ $result,
+            ($result instanceof ContainerInterface) =>
+                /** @return ContainerInterface*/ $result,
 
             default => throw new UnexpectedValueException(sprintf('Unexpected result: %s', get_debug_type($result)))
         };

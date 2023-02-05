@@ -368,6 +368,8 @@ final class MezzioTestEnvironmentTest extends TestCase
         $routeResult = $this->mezzio->getRouteResult();
         Assert::assertInstanceOf(RouteResult::class, $routeResult);
 
+        $this->assertServerRequestProtocolVersion($request, '1.1');
+        $this->assertServerRequestRequestTarget($request, $uri);
         $this->assertServerRequestMethod($request, $method);
         $this->assertServerRequestHeaders($request, $headers);
         $this->assertServerRequestQueryParams($request, $queryParams);
