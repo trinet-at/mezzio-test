@@ -214,6 +214,11 @@ trait AssertionsTrait
         );
     }
 
+    public function assertRouteMiddlewareOrResponseHandler(
+        RouteResult $routeResult,
+        string $middlewareOrResponseHandlerClass
+    ): void {
+        $matchedRoute = $routeResult->getMatchedRoute();
 
         Assert::assertInstanceOf(Route::class, $matchedRoute);
         $matchedMiddlewareOrResponseHandler = $matchedRoute->getMiddleware();
@@ -233,7 +238,7 @@ trait AssertionsTrait
 
         Assert::assertTrue(
             $reflection->implementsInterface(MiddlewareInterface::class) ||
-                $reflection->implementsInterface(RequestHandlerInterface::class),
+            $reflection->implementsInterface(RequestHandlerInterface::class),
             sprintf(
                 'Class "%s" does not implement "%s" or "%s".',
                 $matchedMiddlewareOrResponseHandlerName,
@@ -242,4 +247,5 @@ trait AssertionsTrait
             )
         );
     }
+
 }
