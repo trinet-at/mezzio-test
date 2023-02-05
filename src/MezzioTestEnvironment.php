@@ -151,14 +151,7 @@ final class MezzioTestEnvironment extends Assert
         $withQueryParams = $method === RequestMethodInterface::METHOD_GET ? $params : [];
         $withParsedBody = $method !== RequestMethodInterface::METHOD_GET ? $params : [];
 
-        $request = $this->request(
-            $method,
-            $uri,
-            $withQueryParams,
-            $withParsedBody,
-            [],
-            $headers
-        );
+        $request = $this->request($method, $uri, $withQueryParams, $withParsedBody, [], $headers);
         return $this->dispatchRequest($request);
     }
 
@@ -659,15 +652,14 @@ final class MezzioTestEnvironment extends Assert
     /**
      * @psalm-suppress UnresolvableInclude
      *
-     * @param string $suffix
-     * @return Closure(Application,MiddlewareFactory,ContainerInterface):void|ContainerInterface
+     * @return Closure(Application,MiddlewareFactory,ContainerInterface):ContainerInterface|void
      */
     private function requirePath(string $suffix = ''): ContainerInterface|Closure
     {
         /** @var Closure|ContainerInterface $result */
         $result = require $this->basePath . '/config/' . $suffix;
         if ($result instanceof Closure) {
-            /** @var Closure(Application,MiddlewareFactory,ContainerInterface):void $result */
+            /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void */
             return $result;
         }
         return $result;
