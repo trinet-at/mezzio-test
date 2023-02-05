@@ -83,10 +83,16 @@ trait AssertionsTrait
         );
     }
 
-    public function assertSameRequestMethod(string $method): void
+    public function assertRequestMethod(ServerRequestInterface $request, string $expected): void
     {
-        Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame($method, $this->request->getMethod());
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getMethod()', $request::class)
+            ),
+            $request->getMethod()
+        );
     }
 
     /**
