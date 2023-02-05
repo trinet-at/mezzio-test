@@ -386,6 +386,18 @@ trait AssertionsTrait
         );
     }
 
+    /**
+     * @param array<string,mixed> $expected
+     */
+    public function constraintServerRequestParsedBody(ServerRequestInterface $request, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getParsedBody()', $request::class)
+        );
+    }
+
     public function constraintServerRequestProtocolVersion(
         ServerRequestInterface $request,
         string $expected
