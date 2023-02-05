@@ -118,6 +118,10 @@ trait AssertionsTrait
         );
     }
 
+    public function assertResponseBodyNotContainsString(ResponseInterface $response, string $expected): void
+    {
+        $this->assertNot(
+            $this->constraintResponseBodyContainsString($response, $expected),
             (string)$response->getBody()
         );
     }
