@@ -338,11 +338,7 @@ trait AssertionsTrait
     public function assertServerRequestProtocolVersion(ServerRequestInterface $request, string $expected): void
     {
         $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getProtocolVersion()', $request::class)
-            ),
+            $this->constraintServerRequestProtocolVersion($request, $expected),
             $request->getProtocolVersion()
         );
     }
