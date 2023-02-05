@@ -21,6 +21,7 @@ use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use Throwable;
 
+use UnexpectedValueException;
 use function array_merge;
 use function assert;
 
@@ -652,16 +653,19 @@ final class MezzioTestEnvironment extends Assert
     /**
      * @psalm-suppress UnresolvableInclude
      *
-     * @return Closure(Application,MiddlewareFactory,ContainerInterface):ContainerInterface|void
+     * @return Closure(Application,MiddlewareFactory,ContainerInterface):void|ContainerInterface
      */
     private function requirePath(string $suffix = ''): ContainerInterface|Closure
     {
         /** @var Closure|ContainerInterface $result */
         $result = require $this->basePath . '/config/' . $suffix;
-        if ($result instanceof Closure) {
-            /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void */
-            return $result;
-        }
-        return $result;
+
+        /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void|ContainerInterface */
+        return match(true) {
+            ($result instanceof Closure) => /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void */ $result,
+            ($result instanceof ContainerInterface) => /** @return ContainerInterface*/ $result,
+
+            default => throw new UnexpectedValueException(sprintf('Unexpected result: %s', get_debug_type($result)))
+        };
     }
 }
