@@ -238,11 +238,10 @@ trait AssertionsTrait
     public function assertResponseReasonPhrase(ResponseInterface $response, string $expected): void
     {
         $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getReasonPhrase()', $response::class)
-            ),
+            $this->constraintResponseReasonPhrase($response, $expected),
+            $response->getReasonPhrase()
+        );
+    }
 
     public function assertNotResponseReasonPhrase(ResponseInterface $response, string $expected): void
     {
