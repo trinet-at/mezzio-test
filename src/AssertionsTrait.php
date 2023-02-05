@@ -45,6 +45,11 @@ trait AssertionsTrait
         $this->assertNot($this->constraintResponseStatusCode($response, $expected), $response->getStatusCode());
     }
 
+    public function assertNotServerRequestMethod(ServerRequestInterface $request, string $expected): void
+    {
+        $this->assertNot($this->constraintServerRequestMethod($request, $expected), $request->getMethod());
+    }
+
     {
         $this->assertNot(
             $this->constraint(
