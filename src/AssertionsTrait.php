@@ -13,6 +13,7 @@ use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\Constraint\LogicalNot;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionClass;
@@ -261,6 +262,18 @@ trait AssertionsTrait
                 MiddlewareInterface::class,
                 RequestHandlerInterface::class
             )
+    /**
+     * @param array<UploadedFileInterface> $expected
+     */
+    public function assertServerRequestUploadedFiles(ServerRequestInterface $request, array $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getUploadedFiles()', $request::class)
+            ),
+            $request->getUploadedFiles()
         );
     }
 
