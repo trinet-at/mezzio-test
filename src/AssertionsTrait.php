@@ -288,11 +288,6 @@ trait AssertionsTrait
         );
     }
 
-    public function assertRouteMiddlewareOrResponseHandler(
-        RouteResult $routeResult,
-        string $middlewareOrResponseHandlerClass
-    ): void {
-        $matchedRoute = $routeResult->getMatchedRoute();
     public function assertServerRequestProtocolVersion(ServerRequestInterface $request, array $expected): void
     {
         $this->assert(
@@ -305,8 +300,6 @@ trait AssertionsTrait
         );
     }
 
-        Assert::assertInstanceOf(Route::class, $matchedRoute);
-        $matchedMiddlewareOrResponseHandler = $matchedRoute->getMiddleware();
     /**
      * @param array<string,mixed> $expected
      */
@@ -322,15 +315,6 @@ trait AssertionsTrait
         );
     }
 
-        /** @var class-string $matchedMiddlewareOrResponseHandlerName */
-        $matchedMiddlewareOrResponseHandlerName = match (true) {
-            ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) => (new ReflectionClass(
-                $matchedMiddlewareOrResponseHandler
-            ))
-                ->getProperty('middlewareName')
-                ->getValue($matchedMiddlewareOrResponseHandler),
-            default => $matchedMiddlewareOrResponseHandler::class
-        };
     public function assertServerRequestRequestTarget(ServerRequestInterface $request, string $expected): void
     {
         $this->assert(
@@ -343,18 +327,18 @@ trait AssertionsTrait
         );
     }
 
-        Assert::assertSame($middlewareOrResponseHandlerClass, $matchedMiddlewareOrResponseHandlerName);
-        $reflection = new ReflectionClass($matchedMiddlewareOrResponseHandlerName);
+    public function assertServerRequestUriPath(ServerRequestInterface $request, string $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn(string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getRequestTarget()', $request::class)
+            ),
+            $request->getUri()->getPath()
+        );
+    }
 
-        Assert::assertTrue(
-            $reflection->implementsInterface(MiddlewareInterface::class) ||
-            $reflection->implementsInterface(RequestHandlerInterface::class),
-            sprintf(
-                'Class "%s" does not implement "%s" or "%s".',
-                $matchedMiddlewareOrResponseHandlerName,
-                MiddlewareInterface::class,
-                RequestHandlerInterface::class
-            )
     /**
      * @param array<UploadedFileInterface> $expected
      */
