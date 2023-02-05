@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Trinet\Test\Functional\MezzioTest;
 
+use Fig\Http\Message\RequestMethodInterface;
 use Fig\Http\Message\StatusCodeInterface;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Stratigility\Middleware\CallableMiddlewareDecorator;
 use Laminas\Stratigility\Middleware\RequestHandlerMiddleware;
 use LogicException;
 use Mezzio\Handler\NotFoundHandler;
+use Mezzio\Router\Route;
+use Mezzio\Router\RouteResult;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Trinet\MezzioTest\AssertionsTrait;
 use Trinet\MezzioTest\MezzioTestEnvironment;
 
 use function dirname;
@@ -25,6 +34,8 @@ use function http_build_query;
  */
 final class MezzioTestEnvironmentTest extends TestCase
 {
+    use AssertionsTrait;
+
     private MezzioTestEnvironment $mezzio;
 
     protected function setUp(): void
@@ -64,16 +75,18 @@ final class MezzioTestEnvironmentTest extends TestCase
 
     public function testDispatch(): void
     {
-        $result = $this->mezzio->dispatch('/');
+        $response = $this->mezzio->dispatch('/');
 
-        $this->mezzio->assertSameResponseBody('Hi');
-        $this->mezzio->assertSameResponseStatusCode(StatusCodeInterface::STATUS_OK);
-        $this->mezzio->assertSameResponseReasonPhrase('OK');
-        $this->mezzio->assertSameResponseHeaders([
+        $this->assertResponseBody($response, 'Hi');
+        self::assertSame(200, $this->mezzio->getResponseStatusCode());
+        $this->assertResponseStatusCode($response, StatusCodeInterface::STATUS_OK);
+        $this->assertNotResponseStatusCode($response, StatusCodeInterface::STATUS_NOT_FOUND);
+        $this->assertResponseReasonPhrase($response, 'OK');
+        $this->assertResponseHeaders($response, [
             'content-type' => ['text/plain; charset=utf-8'],
         ]);
 
-        self::assertSame('Hi', (string)$result->getBody());
+        self::assertSame('Hi', (string)$response->getBody());
     }
 
     public function testDispatchGeneratedRoute(): void
@@ -82,11 +95,17 @@ final class MezzioTestEnvironmentTest extends TestCase
 
         $response = $this->mezzio->get($route);
 
-        $this->mezzio->assertSameResponseBody('Hi');
-        $this->mezzio->assertResponseBodyContainsString('H');
-        $this->mezzio->assertSameMatchedRouteName('home');
-        $this->mezzio->assertSameRouteMiddlewareOrResponseHandler(CallableMiddlewareDecorator::class);
-        $this->mezzio->assertSameResponseStatusCode(StatusCodeInterface::STATUS_OK);
+        $request = $this->mezzio->getRequest();
+        Assert::assertInstanceOf(ServerRequestInterface::class, $request);
+
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+
+        $this->assertResponseBody($response, 'Hi');
+        $this->assertResponseBodyContainsString($response, 'H');
+        $this->assertMatchedRouteName($routeResult, 'home');
+        $this->assertRouteMiddlewareOrResponseHandler($routeResult, CallableMiddlewareDecorator::class);
+        $this->assertResponseStatusCode($response, StatusCodeInterface::STATUS_OK);
     }
 
     public function testDispatchHeadersArePassedToRequest(): void
@@ -98,11 +117,15 @@ final class MezzioTestEnvironmentTest extends TestCase
             'foo' => ['bar'],
         ];
 
-        $this->mezzio->get(uri: '/', headers: $headers);
+        $response = $this->mezzio->get(uri: '/', headers: $headers);
+        $request = $this->mezzio->getRequest();
+        Assert::assertInstanceOf(ServerRequestInterface::class, $request);
 
-        $this->mezzio->assertSameRequestHeaders($expected);
-        $this->mezzio->assertSameResponseStatusCode(200);
-        $this->mezzio->assertSameResponseBody('Hi');
+        $this->assertRequestHeaders($request, $expected);
+        $this->assertResponseStatusCode($response, StatusCodeInterface::STATUS_OK);
+        $this->assertResponseBody($response, 'Hi');
+        $this->assertRequestHasHeader($request, 'foo');
+        $this->assertRequestHeaderMatches($request, 'foo', ['bar']);
     }
 
     public function testDispatchParamsArePassedToParsedBodyForPostRequest(): void
@@ -110,12 +133,18 @@ final class MezzioTestEnvironmentTest extends TestCase
         $params = [
             'foo' => 'bar',
         ];
-        $this->mezzio->post('/crud', $params);
+        $response = $this->mezzio->post('/crud', $params);
 
-        $this->mezzio->assertSameMatchedRouteName('crud');
-        $this->mezzio->assertSameRouteMiddlewareOrResponseHandler(RequestHandlerMiddleware::class);
-        $this->mezzio->assertSameRequestParsedBody($params);
-        $this->mezzio->assertSameResponseBody(http_build_query($params));
+        $request = $this->mezzio->getRequest();
+        Assert::assertInstanceOf(ServerRequestInterface::class, $request);
+
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+
+        $this->assertMatchedRouteName($routeResult, 'crud');
+        $this->assertRouteMiddlewareOrResponseHandler($routeResult, RequestHandlerMiddleware::class);
+        $this->assertRequestParsedBody($request, $params);
+        $this->assertResponseBody($response, http_build_query($params));
     }
 
     public function testDispatchParamsArePassedToQueryForGetRequest(): void
@@ -123,9 +152,16 @@ final class MezzioTestEnvironmentTest extends TestCase
         $params = [
             'foo' => 'bar',
         ];
-        $this->mezzio->get('/', $params);
+        $response = $this->mezzio->get('/', $params);
 
-        $this->mezzio->assertSameRequestQueryParams($params);
+        $request = $this->mezzio->getRequest();
+        Assert::assertInstanceOf(ServerRequestInterface::class, $request);
+
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+
+        $this->assertRequestQueryParams($request, $params);
+        $this->assertResponseBody($response, 'Hi');
     }
 
     public function testDispatchRequest(): void
@@ -140,11 +176,15 @@ final class MezzioTestEnvironmentTest extends TestCase
 
     public function testDispatchRoute(): void
     {
-        $result = $this->mezzio->dispatchRoute('404');
-        self::assertSame('Cannot GET /404', (string)$result->getBody());
-        self::assertSame(StatusCodeInterface::STATUS_NOT_FOUND, $result->getStatusCode());
-        $this->mezzio->assertSameResponseStatusCode(StatusCodeInterface::STATUS_NOT_FOUND);
-        $this->mezzio->assertSameRouteMiddlewareOrResponseHandler(NotFoundHandler::class);
+        $response = $this->mezzio->dispatchRoute('404');
+
+        self::assertSame('Cannot GET /404', (string)$response->getBody());
+        self::assertSame(StatusCodeInterface::STATUS_NOT_FOUND, $response->getStatusCode());
+        $this->assertResponseStatusCode($response, StatusCodeInterface::STATUS_NOT_FOUND);
+
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+        $this->assertRouteMiddlewareOrResponseHandler($routeResult, NotFoundHandler::class);
     }
 
     public function testDispatchRouter(): void
@@ -154,8 +194,15 @@ final class MezzioTestEnvironmentTest extends TestCase
         $request = $this->mezzio->request('GET', '/');
         self::assertSame('home', $router->match($request)->getMatchedRouteName());
 
-        $this->mezzio->dispatchRequest($request);
-        $this->mezzio->assertSameMatchedRouteName('home');
+        $response = $this->mezzio->dispatchRequest($request);
+
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+
+        $this->assertResponseHeaders($response, [
+            'content-type' => ['text/plain; charset=utf-8'],
+        ]);
+        $this->assertMatchedRouteName($routeResult, 'home');
     }
 
     public function testRuntimeIsSetToAppTesting(): void

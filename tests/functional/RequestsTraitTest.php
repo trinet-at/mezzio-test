@@ -6,24 +6,32 @@ namespace Trinet\Test\Functional\MezzioTest;
 
 use Fig\Http\Message\RequestMethodInterface;
 use Fig\Http\Message\StatusCodeInterface;
+use Generator;
+use Mezzio\Router\RouteResult;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use Trinet\MezzioTest\AssertionsTrait;
 use Trinet\MezzioTest\MezzioTestEnvironment;
 use UnexpectedValueException;
 
 use function dirname;
 use function http_build_query;
 use function Safe\json_encode;
+use function sprintf;
 
 /**
  * @internal
  *
  * @small
  *
- * @coversDefaultClass \RequestsTrait
+ * @coversDefaultClass \Trinet\MezzioTest\AssertionsTrait
  */
 final class RequestsTraitTest extends TestCase
 {
+    use AssertionsTrait;
+
     public const HTTP_DELETE = 'delete';
 
     public const HTTP_DELETE_JSON = 'deleteJson';
@@ -68,8 +76,24 @@ final class RequestsTraitTest extends TestCase
         $this->mezzio = new MezzioTestEnvironment($basePath);
     }
 
-    /** iterable<string, array<string, mixed>> */
-    public function crudDataProvider(): iterable
+    /**
+     * @return Generator<string,
+     *      array<
+     *          string,
+     *          string,
+     *          array<string,string>,
+     *          array<string,string>,
+     *          array<never,UploadedFileInterface>,
+     *          string,
+     *          array<string,array<string>>>,
+     *          array<never,never>,
+     *          array<never,never>
+     *      >,
+     *      mixed,
+     *      void
+     * >
+     */
+    public function crudDataProvider(): Generator
     {
         $emptyQueryParams = [];
         $emptyHeaders = [];
@@ -327,17 +351,23 @@ final class RequestsTraitTest extends TestCase
                 $cookieParams,
                 $serverParams
             ),
-            default => throw new UnexpectedValueException("Unsupported action: {$action}")
+            default => throw new UnexpectedValueException(sprintf('Unsupported action: %s', $action))
         };
 
-        $this->mezzio->assertSameRequestMethod($method);
-        $this->mezzio->assertSameRequestHeaders($headers);
-        $this->mezzio->assertSameRequestQueryParams($queryParams);
-        $this->mezzio->assertSameRequestParsedBody($parsedBody);
-        $this->mezzio->assertSameMatchedRouteName(self::ROUTE_NAME);
+        $request = $this->mezzio->getRequest();
+        Assert::assertInstanceOf(ServerRequestInterface::class, $request);
 
-        $this->mezzio->assertSameResponseBody($body);
-        $this->mezzio->assertSameResponseStatusCode(StatusCodeInterface::STATUS_OK);
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+
+        $this->assertRequestMethod($request, $method);
+        $this->assertRequestHeaders($request, $headers);
+        $this->assertRequestQueryParams($request, $queryParams);
+        $this->assertRequestParsedBody($request, $parsedBody);
+        $this->assertMatchedRouteName($routeResult, self::ROUTE_NAME);
+
+        $this->assertResponseBody($response, $body);
+        $this->assertResponseStatusCode($response, StatusCodeInterface::STATUS_OK);
         self::assertSame(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
     }
 
@@ -349,15 +379,23 @@ final class RequestsTraitTest extends TestCase
             'function' => __FUNCTION__,
         ];
 
-        $this->mezzio->delete($uri, $payload);
+        $response = $this->mezzio->delete($uri, $payload);
+        $request = $this->mezzio->getRequest();
+        Assert::assertInstanceOf(ServerRequestInterface::class, $request);
 
-        $this->mezzio->assertSameRequestMethod(RequestMethodInterface::METHOD_DELETE);
+        $this->assertRequestMethod($request, RequestMethodInterface::METHOD_DELETE);
 
-        $this->mezzio->assertSameResponseBody(http_build_query($payload));
-        $this->mezzio->assertSameRequestHeaders([]);
-        $this->mezzio->assertSameRequestQueryParams([]);
-        $this->mezzio->assertSameRequestParsedBody($payload);
-        $this->mezzio->assertSameMatchedRouteName(self::ROUTE_NAME);
+        $this->assertResponseBody($response, http_build_query($payload));
+        $this->assertRequestHeaders($request, []);
+        $this->assertResponseHeaders($response, [
+            'content-type' => ['text/plain; charset=utf-8'],
+        ]);
+        $this->assertRequestQueryParams($request, []);
+        $this->assertRequestParsedBody($request, $payload);
+
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+        $this->assertMatchedRouteName($routeResult, self::ROUTE_NAME);
     }
 
     public function testDeleteJson(): void
@@ -368,15 +406,20 @@ final class RequestsTraitTest extends TestCase
             'function' => __FUNCTION__,
         ];
 
-        $this->mezzio->deleteJson($uri, $payload);
+        $response = $this->mezzio->deleteJson($uri, $payload);
+        $this->assertResponseBody($response, json_encode($payload));
+        $this->assertResponseHeader($response, 'Content-Type', ['application/json']);
 
-        $this->mezzio->assertSameRequestMethod(RequestMethodInterface::METHOD_DELETE);
+        $request = $this->mezzio->getRequest();
+        Assert::assertInstanceOf(ServerRequestInterface::class, $request);
 
-        $this->mezzio->assertSameRequestQueryParams([]);
-        $this->mezzio->assertSameRequestParsedBody($payload);
-        $this->mezzio->assertSameMatchedRouteName(self::ROUTE_NAME);
-        $this->mezzio->assertSameRequestHeaders(self::JSON_HEADERS);
+        $this->assertRequestQueryParams($request, []);
+        $this->assertRequestParsedBody($request, $payload);
+        $this->assertRequestHeaders($request, self::JSON_HEADERS);
+        $this->assertRequestMethod($request, RequestMethodInterface::METHOD_DELETE);
 
-        $this->mezzio->assertSameResponseBody(json_encode($payload));
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+        $this->assertMatchedRouteName($routeResult, self::ROUTE_NAME);
     }
 }
