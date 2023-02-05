@@ -365,14 +365,9 @@ trait AssertionsTrait
 
     public function assertServerRequestUriPath(ServerRequestInterface $request, string $expected): void
     {
-        $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getRequestTarget()', $request::class)
-            ),
-            $request->getUri()
-                ->getPath()
+        $this->assert($this->constraintServerRequestUriPath($request, $expected), $request->getUri()->getPath());
+    }
+
     public function constraintResponseBody(ResponseInterface $response, string $expected): Constraint
     {
         return $this->constraint(
