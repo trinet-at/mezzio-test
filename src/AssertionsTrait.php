@@ -56,10 +56,16 @@ trait AssertionsTrait
         );
     }
 
-    public function assertSameMatchedRouteName(string $routeName): void
+    public function assertRequestHeaderMatches(ServerRequestInterface $request, string $name, array $expected): void
     {
-        Assert::assertInstanceOf(RouteResult::class, $this->routeResult);
-        Assert::assertSame($routeName, $this->routeResult->getMatchedRouteName());
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getHeader("%s")', $request::class, $name)
+            ),
+            $request->getHeader($name)
+        );
     }
 
     /**
