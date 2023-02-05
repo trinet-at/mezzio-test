@@ -397,6 +397,18 @@ trait AssertionsTrait
         );
     }
 
+    /**
+     * @param array<string,mixed> $expected
+     */
+    public function constraintServerRequestQueryParams(ServerRequestInterface $request, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getQueryParams()', $request::class)
+        );
+    }
+
     public function constraintServerRequestRequestTarget(ServerRequestInterface $request, string $expected): Constraint
     {
         return $this->constraint(
