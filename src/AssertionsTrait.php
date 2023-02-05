@@ -79,14 +79,15 @@ trait AssertionsTrait
         );
     }
 
+    public function assertResponseHasHeader(ResponseInterface $response, string $name): void
     {
         $this->assert(
             $this->constraint(
                 true,
                 static fn (bool $expectedValue, bool $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::hasHeader("%s")', $request::class, $expected)
+                sprintf('%s::hasHeader("%s")', $response::class, $name)
             ),
-            $request->hasHeader($expected)
+            $response->hasHeader($name)
         );
     }
 
