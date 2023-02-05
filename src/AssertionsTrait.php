@@ -377,6 +377,15 @@ trait AssertionsTrait
         );
     }
 
+    public function constraintResponseStatusCode(ResponseInterface $response, int $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (int $expectedValue, int $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getStatusCode()', $response::class)
+        );
+    }
+
     public function constraintServerRequestMethod(ServerRequestInterface $request, string $expected): Constraint
     {
         return $this->constraint(
