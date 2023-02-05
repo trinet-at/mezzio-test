@@ -406,6 +406,18 @@ trait AssertionsTrait
         );
     }
 
+    /**
+     * @param array<UploadedFileInterface> $expected
+     */
+    public function constraintServerRequestUploadedFiles(ServerRequestInterface $request, array $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getUploadedFiles()', $request::class)
+        );
+    }
+
     public function constraintServerRequestUriPath(ServerRequestInterface $request, string $expected): Constraint
     {
         return $this->constraint(
