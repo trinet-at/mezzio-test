@@ -8,6 +8,7 @@ use Fig\Http\Message\RequestMethodInterface;
 use Fig\Http\Message\StatusCodeInterface;
 use Generator;
 use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\UploadedFile;
 use Laminas\Stratigility\Middleware\CallableMiddlewareDecorator;
 use Laminas\Stratigility\Middleware\RequestHandlerMiddleware;
 use LogicException;
@@ -75,6 +76,8 @@ final class MezzioTestEnvironmentTest extends TestCase
     ];
 
     public const ROUTE_NAME = 'crud';
+
+    public const ROUTE_PATH = '/crud';
 
     private MezzioTestEnvironment $mezzio;
 
@@ -266,6 +269,83 @@ final class MezzioTestEnvironmentTest extends TestCase
         $routeResult = $this->mezzio->getRouteResult();
         Assert::assertInstanceOf(RouteResult::class, $routeResult);
         $this->assertMatchedRouteName($routeResult, __FUNCTION__);
+    }
+
+    public function testAssertions(): void
+    {
+        $uri = $this->mezzio->generateUri(self::ROUTE_NAME);
+
+        $queryParams = [
+            'query' => 'params',
+        ];
+        $headers = [
+            'header' => 'on',
+        ];
+        $cookieParams = [
+            'user' => '1',
+        ];
+        $serverParams = [
+            'dev' => '0',
+        ];
+
+        $response = $this->mezzio->getJson($uri, $queryParams, $headers, $cookieParams, $serverParams);
+
+        $request = $this->mezzio->getRequest();
+        Assert::assertInstanceOf(ServerRequestInterface::class, $request);
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+
+        $this->assertMatchedRouteName($routeResult, self::ROUTE_NAME);
+        $this->assertNotMatchedRouteName($routeResult, self::ROUTE_PATH);
+        $this->assertNotResponseStatusCode($response, StatusCodeInterface::STATUS_NOT_FOUND);
+        $this->assertNotServerRequestMethod($request, RequestMethodInterface::METHOD_PURGE);
+        $this->assertNotServerRequestParsedBody($request, [
+            'form' => 'input',
+        ]);
+        $this->assertNotServerRequestProtocolVersion($request, '0.42');
+        $this->assertNotServerRequestQueryParams($request, [
+            'query' => 'param',
+        ]);
+        $this->assertNotServerRequestRequestTarget($request, 'target');
+        $this->assertNotServerRequestUploadedFiles($request, [new UploadedFile('php://memory', 0, 0)]);
+        $this->assertNotServerRequestUriPath($request, '404');
+        $this->assertResponseBody($response, '{"query":"params"}');
+        $this->assertResponseBodyContainsString($response, 'query');
+        $this->assertResponseBodyNotContainsString($response, 'search');
+        $this->assertResponseHasHeader($response, 'header');
+        $this->assertNotResponseHasHeader($response, 'query');
+        $this->assertResponseHeader($response, 'header', ['on']);
+        $this->assertNotResponseHeader($response, 'header', ['off']);
+        $this->assertResponseHeaders($response, [
+            'content-type' => ['application/json'],
+            'header' => ['on'],
+        ]);
+        $this->assertNotResponseHeaders($response, ['header']);
+        $this->assertResponseReasonPhrase($response, 'OK');
+        $this->assertNotResponseReasonPhrase($response, 'query');
+        $this->assertResponseStatusCode($response, StatusCodeInterface::STATUS_OK);
+        $this->assertRouteMiddlewareOrResponseHandler($routeResult, RequestHandlerMiddleware::class);
+        $this->assertServerRequestAttributes($request, []);
+        $this->assertServerRequestBody($request, '');
+        $this->assertServerRequestCookieParams($request, [
+            'user' => '1',
+        ]);
+        $this->assertServerRequestHasHeader($request, 'Content-Type');
+        $this->assertServerRequestHeader($request, 'Accept', ['application/json']);
+        $this->assertServerRequestHeaders($request, [
+            'header' => ['on'],
+            'Content-Type' => ['application/json'],
+            'Accept' => ['application/json'],
+        ]);
+        $this->assertServerRequestMethod($request, 'GET');
+        $this->assertServerRequestParsedBody($request, []);
+        $this->assertServerRequestProtocolVersion($request, '1.1');
+        $this->assertServerRequestQueryParams($request, [
+            'query' => 'params',
+        ]);
+        $this->assertServerRequestRequestTarget($request, self::ROUTE_PATH);
+        $this->assertServerRequestUploadedFiles($request, []);
+        $this->assertServerRequestUriPath($request, self::ROUTE_PATH);
     }
 
     /**
