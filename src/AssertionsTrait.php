@@ -26,11 +26,11 @@ trait AssertionsTrait
     public function assertMatchedRouteName(RouteResult $routeResult, string $expected): void
     {
         $this->assert(
-            $this->constraint(
-                $expected,
-                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
-                sprintf('%s::getMatchedRouteName()', $routeResult::class)
-            ),
+            $this->constraintMatchedRouteName($routeResult, $expected),
+            $routeResult->getMatchedRouteName()
+        );
+    }
+
             $routeResult->getMatchedRouteName()
         );
     }
