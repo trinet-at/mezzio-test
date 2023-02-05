@@ -198,15 +198,19 @@ trait AssertionsTrait
         /** @var class-string $matchedMiddlewareOrResponseHandlerName */
         $matchedMiddlewareOrResponseHandlerName = match (true) {
             ($matchedMiddlewareOrResponseHandler instanceof LazyLoadingMiddleware) =>
-            (static function () use ($matchedMiddlewareOrResponseHandler): mixed {
-                $property = (
-                    new ReflectionClass($matchedMiddlewareOrResponseHandler)
-                )->getProperty('middlewareName');
+            (static function (object $matchedMiddlewareOrResponseHandler): mixed {
+                $reflectionClass = new ReflectionClass($matchedMiddlewareOrResponseHandler);
 
-                $property->setAccessible(true);
+                $reflectionProperty = $reflectionClass->getProperty('middlewareName');
 
-                return $property->getValue($matchedMiddlewareOrResponseHandler);
-            })(),
+                $reflectionProperty->setAccessible(true);
+
+                $value = $reflectionProperty->getValue($matchedMiddlewareOrResponseHandler);
+
+                $reflectionProperty->setAccessible(false);
+
+                return $value;
+            })($matchedMiddlewareOrResponseHandler),
             default => $matchedMiddlewareOrResponseHandler::class
         };
 
