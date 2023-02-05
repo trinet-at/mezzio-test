@@ -105,6 +105,11 @@ trait AssertionsTrait
         );
     }
 
+    public function assertResponseBody(ResponseInterface $response, string $expected): void
+    {
+        $this->assert($this->constraintResponseBody($response, $expected), (string)$response->getBody());
+    }
+
     public function assertResponseBodyContainsString(ResponseInterface $response, string $expected): void
     {
         $this->assert(
