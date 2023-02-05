@@ -52,7 +52,18 @@ trait AssertionsTrait
         );
     }
 
-    public function assertRequestHasHeader(ServerRequestInterface $request, string $expected): void
+    public function assertResponseBody(ResponseInterface $response, string $expected): void
+    {
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                $response::class . '::getBody()'
+            ),
+            (string)$response->getBody()
+        );
+    }
+
     {
         $this->assert(
             $this->constraint(
