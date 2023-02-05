@@ -190,9 +190,16 @@ trait AssertionsTrait
         );
     }
 
+    public function assertResponseReasonPhrase(ResponseInterface $response, string $expected): void
     {
-        Assert::assertInstanceOf(ResponseInterface::class, $this->response);
-        Assert::assertSame($statusCode, $this->response->getStatusCode());
+        $this->assert(
+            $this->constraint(
+                $expected,
+                static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getReasonPhrase()', $response::class)
+            ),
+            $response->getReasonPhrase()
+        );
     }
 
     public function assertSameRouteMiddlewareOrResponseHandler(string $middlewareOrResponseHandlerClass): void
