@@ -27,7 +27,6 @@ use function assert;
 final class MezzioTestEnvironment extends Assert
 {
     use AssertionsTrait;
-    use RequestsTrait;
 
     private Application $application;
 
