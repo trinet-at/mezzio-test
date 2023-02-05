@@ -247,6 +247,15 @@ trait AssertionsTrait
         );
     }
 
+    public function constraintResponseReasonPhrase(ResponseInterface $response, string $expected): Constraint
+    {
+        return $this->constraint(
+            $expected,
+            static fn (string $expectedValue, string $actualValue): bool => $expectedValue === $actualValue,
+            sprintf('%s::getReasonPhrase()', $response::class)
+        );
+    }
+
     public function assertResponseStatusCode(ResponseInterface $response, int $expected): void
     {
         $this->assert($this->constraintResponseStatusCode($response, $expected), $response->getStatusCode());
