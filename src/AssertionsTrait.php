@@ -71,13 +71,15 @@ trait AssertionsTrait
     /**
      * @param array<array<string>|string> $headers
      */
-    public function assertSameRequestHeaders(array $headers): void
+    public function assertRequestHeaders(ServerRequestInterface $request, array $headers): void
     {
-        Assert::assertInstanceOf(RequestInterface::class, $this->request);
-        Assert::assertSame(
-            $headers,
-            $this->request->getHeaders(),
-            'Failed asserting that RequestHeaders are identical.'
+        $this->assert(
+            $this->constraint(
+                $headers,
+                static fn (array $expectedValue, array $actualValue): bool => $expectedValue === $actualValue,
+                sprintf('%s::getHeaders()', $request::class)
+            ),
+            $request->getHeaders()
         );
     }
 
