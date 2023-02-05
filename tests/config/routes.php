@@ -20,11 +20,20 @@ return static function (Application $app): void {
         public function handle(ServerRequestInterface $request): ResponseInterface
         {
             $body = array_merge((array)$request->getParsedBody(), $request->getQueryParams());
-            if (str_contains($request->getHeaderLine('Content-Type'), 'json')) {
-                return new JsonResponse($body);
+
+            /** @var ResponseInterface $response */
+            $response = match (true) {
+                str_contains($request->getHeaderLine('Content-Type'), 'json') => new JsonResponse($body),
+                default => new TextResponse(http_build_query($body))
+            };
+
+            $header = $request->getHeader('header');
+
+            if ($header === []) {
+                return $response;
             }
 
-            return new TextResponse(http_build_query($body));
+            return $response->withHeader('header', $header);
         }
     }, 'crud');
 };
