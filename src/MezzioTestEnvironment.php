@@ -9,6 +9,7 @@ use Fig\Http\Message\RequestMethodInterface;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
+use Mezzio\Router\Route;
 use Mezzio\Router\RouteResult;
 use Mezzio\Router\RouterInterface;
 use PHPUnit\Framework\Assert;
@@ -68,13 +69,18 @@ final class MezzioTestEnvironment extends Assert
         ($this->requireClosure('routes.php'))($this->application, $middlewareFactory, $this->container);
 
         // Attach an ErrorListener to the ErrorHandler
-        if (!$this->container->has(ErrorHandler::class)) {
+        if (! $this->container->has(ErrorHandler::class)) {
             return;
         }
 
         /** @var ErrorHandler $errorHandler */
         $errorHandler = $this->container->get(ErrorHandler::class);
         $errorHandler->attachListener(static fn (Throwable $error) => throw $error);
+    }
+
+    public function addRoute(Route $route): void
+    {
+        $this->router->addRoute($route);
     }
 
     /**

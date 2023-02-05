@@ -34,6 +34,26 @@ final class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio = new MezzioTestEnvironment($basePath);
     }
 
+    public function testAddRoute(): void
+    {
+        $this->mezzio->addRoute(
+            new Route(__FUNCTION__, new class () implements MiddlewareInterface {
+                public function process(
+                    ServerRequestInterface $request,
+                    RequestHandlerInterface $handler
+                ): ResponseInterface {
+                    return $handler->handle($request);
+                }
+            }, [RequestMethodInterface::METHOD_GET], __FUNCTION__)
+        );
+
+        $this->mezzio->dispatchRoute(__FUNCTION__);
+
+        $routeResult = $this->mezzio->getRouteResult();
+        Assert::assertInstanceOf(RouteResult::class, $routeResult);
+        $this->assertMatchedRouteName($routeResult, __FUNCTION__);
+    }
+
     public function testCustomErrorHandlerRethrowsException(): void
     {
         $this->expectException(LogicException::class);
