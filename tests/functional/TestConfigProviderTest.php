@@ -7,17 +7,15 @@ namespace Trinet\Test\Functional\MezzioTest;
 use PHPUnit\Framework\TestCase;
 use Trinet\MezzioTest\TestConfigProvider;
 
-class TestConfigProviderTest extends TestCase
+/**
+ * @internal
+ *
+ * @small
+ *
+ * @coversDefaultClass \Trinet\MezzioTest\TestConfigProvider
+ */
+final class TestConfigProviderTest extends TestCase
 {
-    public function testReturnsEmptyArrayWhenNotInTestingEnvironment(): void
-    {
-        \Safe\putenv('APP_TESTING');
-
-        $result = TestConfigProvider::load();
-
-        self::assertSame([], $result);
-    }
-
     public function testAdditionalFileProvidersAreReturnedWhenTesting(): void
     {
         \Safe\putenv('APP_TESTING=true');
@@ -42,5 +40,14 @@ class TestConfigProviderTest extends TestCase
         $propertyB = ReflectionUtil::getReflectionProperty($providerB, 'pattern');
         self::assertIsString($propertyB);
         self::assertStringContainsString($path, $propertyB);
+    }
+
+    public function testReturnsEmptyArrayWhenNotInTestingEnvironment(): void
+    {
+        \Safe\putenv('APP_TESTING');
+
+        $result = TestConfigProvider::load();
+
+        self::assertSame([], $result);
     }
 }

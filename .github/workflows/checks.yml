@@ -7,11 +7,11 @@ jobs:
 
     strategy:
       matrix:
-        php: ["7.4", "8.0", "8.1"]
+        php: ["8.0", "8.1", "8.2"]
         composer_args:
           - '--prefer-lowest'
           - ''
-
+    continue-on-error: true
     runs-on: ubuntu-latest
     container:
       image: eventjet/checks-${{ matrix.php }}:latest

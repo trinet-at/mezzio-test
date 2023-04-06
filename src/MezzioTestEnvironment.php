@@ -1,143 +1,674 @@
 <?php
 
-/**
- * @noinspection PhpIncludeInspection
- */
-
 declare(strict_types=1);
 
 namespace Trinet\MezzioTest;
 
+use Closure;
 use Fig\Http\Message\RequestMethodInterface;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
+use Mezzio\Router\Route;
+use Mezzio\Router\RouteResult;
 use Mezzio\Router\RouterInterface;
+use PHPUnit\Framework\Assert;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use Throwable;
+use UnexpectedValueException;
 
-use function count;
+use function array_merge;
+use function assert;
+use function get_debug_type;
+use function sprintf;
 
-final class MezzioTestEnvironment
+final class MezzioTestEnvironment extends Assert
 {
-    private ?ContainerInterface $container = null;
-    private ?Application $app = null;
+    use AssertionsTrait;
+
+    private Application $application;
+
     private string $basePath;
 
+    private ContainerInterface $container;
+
+    private ?ServerRequestInterface $request = null;
+
+    private ?ResponseInterface $response = null;
+
+    private RouterInterface $router;
+
+    private ?RouteResult $routeResult = null;
+
+    /**
+     * @psalm-suppress PossiblyInvalidFunctionCall
+     */
     public function __construct(?string $basePath = null)
     {
         \Safe\putenv('APP_TESTING=true');
-        $this->basePath = $basePath ?? Util::basePath();
-        $this->basePath = Util::ensureTrailingSlash($this->basePath);
+
+        $basePath ??= Util::basePath();
+
+        $this->basePath = Util::ensureTrailingSlash($basePath);
+
         \Safe\chdir($this->basePath);
-        $this->app();   // initialize App for routes to be populated
-        $this->registerErrorListener();
+
+        // initialize App for routes to be populated
+
+        $this->container = $this->requireContainer();
+
+        $this->application = $this->container->get(Application::class);
+
+        $this->router = $this->container->get(RouterInterface::class);
+
+        $this->requireClosure('pipeline.php', 'routes.php');
+
+        // Attach an ErrorListener to the ErrorHandler
+        if (! $this->container->has(ErrorHandler::class)) {
+            return;
+        }
+
+        /** @var ErrorHandler $errorHandler */
+        $errorHandler = $this->container->get(ErrorHandler::class);
+        $errorHandler->attachListener(static fn (Throwable $error) => throw $error);
+    }
+
+    public function addRoute(Route $route): void
+    {
+        $this->router->addRoute($route);
     }
 
     /**
-     * @param string|UriInterface $uri
-     * @param array<string, mixed> $params
-     * @param array<string, string> $headers
+     * Visit the given URI with a DELETE request.
+     *
+     * @param array<string,string>                      $parsedBody
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function delete(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                RequestMethodInterface::METHOD_DELETE,
+                $uri,
+                [],
+                $parsedBody,
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Visit the given URI with a DELETE request, expecting a JSON response.
+     *
+     * @param array<string,string>                      $parsedBody
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function deleteJson(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                RequestMethodInterface::METHOD_DELETE,
+                $uri,
+                [],
+                $parsedBody,
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * @param array<string,string>                      $params
+     * @param array<string,array<string,string>|string> $headers
      */
     public function dispatch(
-        $uri,
-        ?string $method = null,
+        UriInterface|string $uri,
+        string $method = RequestMethodInterface::METHOD_GET,
         array $params = [],
         array $headers = []
     ): ResponseInterface {
-        if ($method === null) {
-            $method = RequestMethodInterface::METHOD_GET;
-        }
-        $request = new ServerRequest([], [], $uri, $method);
+        $withQueryParams = $method === RequestMethodInterface::METHOD_GET ? $params : [];
+        $withParsedBody = $method !== RequestMethodInterface::METHOD_GET ? $params : [];
 
-        if (count($params) !== 0) {
-            switch ($method) {
-                case RequestMethodInterface::METHOD_GET:
-                    $request = $request->withQueryParams($params);
-                    break;
-                case RequestMethodInterface::METHOD_PUT:
-                case RequestMethodInterface::METHOD_PATCH:
-                case RequestMethodInterface::METHOD_POST:
-                    $request = $request->withParsedBody($params);
-            }
-        }
+        $request = $this->request($method, $uri, $withQueryParams, $withParsedBody, [], $headers);
+        return $this->dispatchRequest($request);
+    }
 
-        foreach ($headers as $header => $value) {
-            $request = $request->withHeader($header, $value);
-        }
+    public function dispatchRequest(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->request = $request;
 
-        return $this->app()->handle($request);
+        $this->match($request);
+
+        return $this->response = $this->application->handle($request);
     }
 
     /**
-     * @param array<string, mixed> $routeParams
-     * @param array<string, mixed> $requestParams
+     * @param array<string, mixed>  $routeParams
+     * @param array<string, mixed>  $queryParams
      * @param array<string, string> $headers
      */
     public function dispatchRoute(
         string $routeName,
         array $routeParams = [],
-        ?string $method = null,
-        array $requestParams = [],
+        string $method = RequestMethodInterface::METHOD_GET,
+        array $queryParams = [],
         array $headers = []
     ): ResponseInterface {
-        $router = $this->router();
-        $route = $router->generateUri($routeName, $routeParams);
-        return $this->dispatch($route, $method, $requestParams, $headers);
-    }
+        $routeUrl = $this->generateUri($routeName, $routeParams);
 
-    public function dispatchRequest(ServerRequestInterface $request): ResponseInterface
-    {
-        return $this->app()->handle($request);
+        return $this->dispatchRequest($this->request($method, $routeUrl, $queryParams, $headers));
     }
 
     /**
-     * @psalm-suppress UnresolvableInclude
+     * Generate a URI from the named route.
+     *
+     * @param array<string,mixed> $routeParams
+     * @param array<string,mixed> $options
      */
-    public function container(): ContainerInterface
+    public function generateUri(string $name, array $routeParams = [], array $options = []): string
     {
-        if ($this->container !== null) {
-            return $this->container;
-        }
-        $this->container = require $this->basePath . 'config/container.php';
+        return $this->router->generateUri($name, $routeParams, $options);
+    }
+
+    /**
+     * Visit the given URI with a GET request.
+     *
+     * @param array<string,string>                      $queryParams
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function get(
+        UriInterface|string $uri,
+        array $queryParams = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                RequestMethodInterface::METHOD_GET,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    public function getApplication(): Application
+    {
+        return $this->application;
+    }
+
+    public function getContainer(): ContainerInterface
+    {
         return $this->container;
     }
 
-    public function router(): RouterInterface
-    {
-        return $this->container()->get(RouterInterface::class);
+    /**
+     * Visit the given URI with a GET request, expecting a JSON response.
+     *
+     * @param array<string,string>                      $queryParams
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function getJson(
+        UriInterface|string $uri,
+        array $queryParams = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                RequestMethodInterface::METHOD_GET,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
     }
 
-    private function registerErrorListener(): void
+    public function getRequest(): ?ServerRequestInterface
     {
-        if (!$this->container()->has(ErrorHandler::class)) {
-            return; // @codeCoverageIgnore
-        }
-        $errorHandler = $this->container()->get(ErrorHandler::class);
-        $errorHandler->attachListener(
-            static function (Throwable $error): void {
-                throw $error;
-            }
+        return $this->request;
+    }
+
+    public function getResponse(): ?ResponseInterface
+    {
+        return $this->response;
+    }
+
+    public function getRouter(): RouterInterface
+    {
+        return $this->router;
+    }
+
+    public function getRouteResult(): ?RouteResult
+    {
+        return $this->routeResult;
+    }
+
+    /**
+     * Visit the given URI with a HEAD request.
+     *
+     * @param array<string,string>                      $queryParams
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function head(
+        UriInterface|string $uri,
+        array $queryParams = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                RequestMethodInterface::METHOD_HEAD,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
         );
     }
 
     /**
-     * @psalm-suppress UnresolvableInclude
+     * Match a request against the known routes.
      */
-    private function app(): Application
+    public function match(ServerRequestInterface $request): RouteResult
     {
-        if ($this->app !== null) {
-            return $this->app;
-        }
-        $this->app = $this->container()->get(Application::class);
-        $factory = $this->container()->get(MiddlewareFactory::class);
+        return $this->routeResult = $this->router->match($request);
+    }
 
-        (require $this->basePath . 'config/pipeline.php')($this->app, $factory, $this->container());
-        (require $this->basePath . 'config/routes.php')($this->app, $factory, $this->container());
-        return $this->app;
+    /**
+     * Visit the given URI with a OPTIONS request.
+     *
+     * @param array<string,string>                      $queryParams
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function options(
+        UriInterface|string $uri,
+        array $queryParams = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                RequestMethodInterface::METHOD_OPTIONS,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Visit the given URI with a OPTIONS request, expecting a JSON response.
+     *
+     * @param array<string,string>                      $queryParams
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function optionsJson(
+        UriInterface|string $uri,
+        array $queryParams = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                RequestMethodInterface::METHOD_OPTIONS,
+                $uri,
+                $queryParams,
+                [],
+                [],
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Visit the given URI with a PATCH request.
+     *
+     * @param array<string,string>                      $parsedBody
+     * @param array<UploadedFileInterface>              $uploadedFiles
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function patch(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                RequestMethodInterface::METHOD_PATCH,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Visit the given URI with a PATCH request, expecting a JSON response.
+     *
+     * @param array<string,string>                      $parsedBody
+     * @param array<UploadedFileInterface>              $uploadedFiles
+     * @param array<string,array<string,string>|string> $headers
+     * @param array<string,string>                      $cookieParams
+     * @param array<string,string>                      $serverParams
+     */
+    public function patchJson(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                RequestMethodInterface::METHOD_PATCH,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Visit the given URI with a POST request.
+     *
+     * @param array<string, string>                $parsedBody
+     * @param array<UploadedFileInterface>         $uploadedFiles
+     * @param array<string, array<string, string>> $headers
+     * @param array<string, string>                $cookieParams
+     * @param array<string, string>                $serverParams
+     */
+    public function post(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                RequestMethodInterface::METHOD_POST,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Visit the given URI with a POST request, expecting a JSON response.
+     *
+     * @param array<string, string>                $parsedBody
+     * @param array<UploadedFileInterface>         $uploadedFiles
+     * @param array<string, array<string, string>> $headers
+     * @param array<string, string>                $cookieParams
+     * @param array<string, string>                $serverParams
+     */
+    public function postJson(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                RequestMethodInterface::METHOD_POST,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Visit the given URI with a PUT request.
+     *
+     * @param array<string, string>                $parsedBody
+     * @param array<UploadedFileInterface>         $uploadedFiles
+     * @param array<string, array<string, string>> $headers
+     * @param array<string, string>                $cookieParams
+     * @param array<string, string>                $serverParams
+     */
+    public function put(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->request(
+                RequestMethodInterface::METHOD_PUT,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Visit the given URI with a PUT request, expecting a JSON response.
+     *
+     * @param array<string, string>                $parsedBody
+     * @param array<UploadedFileInterface>         $uploadedFiles
+     * @param array<string, array<string, string>> $headers
+     * @param array<string, string>                $cookieParams
+     * @param array<string, string>                $serverParams
+     */
+    public function putJson(
+        UriInterface|string $uri,
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        return $this->dispatchRequest(
+            $this->requestJson(
+                RequestMethodInterface::METHOD_PUT,
+                $uri,
+                [],
+                $parsedBody,
+                $uploadedFiles,
+                $headers,
+                $cookieParams,
+                $serverParams
+            )
+        );
+    }
+
+    /**
+     * Build a Request.
+     *
+     * @param array<string, mixed>                        $queryParams
+     * @param array<string, string>                       $parsedBody
+     * @param array<UploadedFileInterface>                $uploadedFiles
+     * @param array<string, array<string, string>|string> $headers
+     * @param array<string, string>                       $cookieParams
+     * @param array<string, string>                       $serverParams
+     */
+    public function request(
+        string $method,
+        string|UriInterface $uri,
+        array $queryParams = [],
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ServerRequestInterface {
+        return $this->request = new ServerRequest(
+            $serverParams,
+            $uploadedFiles,
+            $uri,
+            $method,
+            'php://input',
+            $headers,
+            $cookieParams,
+            $queryParams,
+            $parsedBody,
+        );
+    }
+
+    /**
+     * Build a Request, expecting a JSON response.
+     *
+     * @param array<string, mixed>                        $queryParams
+     * @param array<string, string>                       $parsedBody
+     * @param array<UploadedFileInterface>                $uploadedFiles
+     * @param array<string, array<string, string>|string> $headers
+     * @param array<string, string>                       $cookieParams
+     * @param array<string, string>                       $serverParams
+     */
+    public function requestJson(
+        string $method,
+        string|UriInterface $uri,
+        array $queryParams = [],
+        array $parsedBody = [],
+        array $uploadedFiles = [],
+        array $headers = [],
+        array $cookieParams = [],
+        array $serverParams = [],
+    ): ServerRequestInterface {
+        $headers = array_merge($headers, [
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ]);
+
+        return $this->request(
+            $method,
+            $uri,
+            $queryParams,
+            $parsedBody,
+            $uploadedFiles,
+            $headers,
+            $cookieParams,
+            $serverParams,
+        );
+    }
+
+    private function requireClosure(string ...$paths): void
+    {
+        /** @var MiddlewareFactory $middlewareFactory */
+        $middlewareFactory = $this->container->get(MiddlewareFactory::class);
+        foreach ($paths as $path) {
+            $result = $this->requirePath($path);
+            assert($result instanceof Closure);
+            $result($this->application, $middlewareFactory, $this->container);
+        }
+    }
+
+    private function requireContainer(): ContainerInterface
+    {
+        $result = $this->requirePath('container.php');
+        assert($result instanceof ContainerInterface);
+        return $result;
+    }
+
+    /**
+     * @psalm-suppress UnresolvableInclude
+     *
+     * @return Closure(Application,MiddlewareFactory,ContainerInterface):void|ContainerInterface
+     */
+    private function requirePath(string $suffix = ''): ContainerInterface|Closure
+    {
+        $result = require $this->basePath . '/config/' . $suffix;
+
+        /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void|ContainerInterface */
+        return match (true) {
+            ($result instanceof Closure) =>
+                /** @return Closure(Application,MiddlewareFactory,ContainerInterface):void */ $result,
+            ($result instanceof ContainerInterface) =>
+                /** @return ContainerInterface*/ $result,
+
+            default => throw new UnexpectedValueException(sprintf('Unexpected result: %s', get_debug_type($result)))
+        };
     }
 }

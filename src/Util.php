@@ -9,7 +9,7 @@ use UnexpectedValueException;
 
 use function dirname;
 use function file_exists;
-use function strlen;
+use function mb_strlen;
 use function trim;
 
 final class Util
@@ -34,7 +34,7 @@ final class Util
         if (trim($path) === '') {
             throw new UnexpectedValueException('Given path must not be an empty string.');
         }
-        if ($path[strlen($path) - 1] === '/') {
+        if ($path[mb_strlen($path) - 1] === '/') {
             return $path;
         }
         return $path . '/';

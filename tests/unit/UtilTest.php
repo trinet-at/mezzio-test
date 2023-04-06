@@ -10,7 +10,14 @@ use UnexpectedValueException;
 
 use function dirname;
 
-class UtilTest extends TestCase
+/**
+ * @internal
+ *
+ * @small
+ *
+ * @coversDefaultClass \Trinet\MezzioTest\Util
+ */
+final class UtilTest extends TestCase
 {
     public function testBasePath(): void
     {
@@ -28,6 +35,15 @@ class UtilTest extends TestCase
         self::assertSame($path . '/', $result);
     }
 
+    public function testEnsureTrailingSlashBailsEarlyIfGivenPathAlreadyHasATrailingSlash(): void
+    {
+        $path = 'foo/bar/';
+
+        $result = Util::ensureTrailingSlash($path);
+
+        self::assertSame($path, $result);
+    }
+
     public function testEnsureTrailingSlashThrowsExceptionIfEmptyStringIsGiven(): void
     {
         $this->expectException(UnexpectedValueException::class);
@@ -42,14 +58,5 @@ class UtilTest extends TestCase
         $this->expectExceptionMessage('Given path must not be an empty string.');
 
         Util::ensureTrailingSlash(' ');
-    }
-
-    public function testEnsureTrailingSlashBailsEarlyIfGivenPathAlreadyHasATrailingSlash(): void
-    {
-        $path = 'foo/bar/';
-
-        $result = Util::ensureTrailingSlash($path);
-
-        self::assertSame($path, $result);
     }
 }
