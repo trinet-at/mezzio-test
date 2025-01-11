@@ -13,7 +13,7 @@ final class TestConfigProvider
     /**
      * @return list<PhpFileProvider>
      */
-    public static function load(?string $configDir = null): array
+    public static function load(string|null $configDir = null): array
     {
         if (!self::isTesting()) {
             return [];
@@ -32,7 +32,7 @@ final class TestConfigProvider
         return $testing !== false;
     }
 
-    private static function prepareConfigDir(?string $configDir): string
+    private static function prepareConfigDir(string|null $configDir): string
     {
         if ($configDir === null) {
             return Util::basePath() . 'config/autoload/';

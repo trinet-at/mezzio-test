@@ -20,20 +20,22 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Throwable;
 
+use function chdir;
 use function count;
+use function putenv;
 
 final class MezzioTestEnvironment
 {
-    private ?ContainerInterface $container = null;
-    private ?Application $app = null;
+    private ContainerInterface|null $container = null;
+    private Application|null $app = null;
     private string $basePath;
 
-    public function __construct(?string $basePath = null)
+    public function __construct(string|null $basePath = null)
     {
-        \Safe\putenv('APP_TESTING=true');
+        putenv('APP_TESTING=true');
         $this->basePath = $basePath ?? Util::basePath();
         $this->basePath = Util::ensureTrailingSlash($this->basePath);
-        \Safe\chdir($this->basePath);
+        chdir($this->basePath);
         $this->app();   // initialize App for routes to be populated
         $this->registerErrorListener();
     }
@@ -45,9 +47,9 @@ final class MezzioTestEnvironment
      */
     public function dispatch(
         $uri,
-        ?string $method = null,
+        string|null $method = null,
         array $params = [],
-        array $headers = []
+        array $headers = [],
     ): ResponseInterface {
         if ($method === null) {
             $method = RequestMethodInterface::METHOD_GET;
@@ -81,9 +83,9 @@ final class MezzioTestEnvironment
     public function dispatchRoute(
         string $routeName,
         array $routeParams = [],
-        ?string $method = null,
+        string|null $method = null,
         array $requestParams = [],
-        array $headers = []
+        array $headers = [],
     ): ResponseInterface {
         $router = $this->router();
         $route = $router->generateUri($routeName, $routeParams);
@@ -103,7 +105,9 @@ final class MezzioTestEnvironment
         if ($this->container !== null) {
             return $this->container;
         }
-        $this->container = require $this->basePath . 'config/container.php';
+        /** @var ContainerInterface $container */
+        $container = require $this->basePath . 'config/container.php';
+        $this->container = $container;
         return $this->container;
     }
 
@@ -121,7 +125,7 @@ final class MezzioTestEnvironment
         $errorHandler->attachListener(
             static function (Throwable $error): void {
                 throw $error;
-            }
+            },
         );
     }
 
@@ -136,8 +140,12 @@ final class MezzioTestEnvironment
         $this->app = $this->container()->get(Application::class);
         $factory = $this->container()->get(MiddlewareFactory::class);
 
-        (require $this->basePath . 'config/pipeline.php')($this->app, $factory, $this->container());
-        (require $this->basePath . 'config/routes.php')($this->app, $factory, $this->container());
+        /** @var callable $pipeline */
+        $pipeline = require $this->basePath . 'config/pipeline.php';
+        $pipeline($this->app, $factory, $this->container());
+        /** @var callable $routes */
+        $routes = require $this->basePath . 'config/routes.php';
+        $routes($this->app, $factory, $this->container());
         return $this->app;
     }
 }

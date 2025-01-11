@@ -20,13 +20,6 @@ class MezzioTestEnvironmentTest extends TestCase
 {
     private MezzioTestEnvironment $mezzio;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $basePath = dirname(__DIR__);
-        $this->mezzio = new MezzioTestEnvironment($basePath);
-    }
-
     public function testDispatch(): void
     {
         $result = $this->mezzio->dispatch('/');
@@ -82,6 +75,7 @@ class MezzioTestEnvironmentTest extends TestCase
         $params = ['foo' => 'bar'];
         $this->mezzio->dispatch('/', null, $params);
 
+        /** @var RequestLoggerCallback $logger */
         $request = $logger->getRequest();
         self::assertSame($request->getQueryParams(), $params);
     }
@@ -96,6 +90,7 @@ class MezzioTestEnvironmentTest extends TestCase
         $params = ['foo' => 'bar'];
         $this->mezzio->dispatch('/', RequestMethodInterface::METHOD_POST, $params);
 
+        /** @var RequestLoggerCallback $logger */
         $request = $logger->getRequest();
         self::assertSame($request->getParsedBody(), $params);
     }
@@ -116,6 +111,7 @@ class MezzioTestEnvironmentTest extends TestCase
             ],
         ];
 
+        /** @var RequestLoggerCallback $logger */
         $request = $logger->getRequest();
         self::assertSame($request->getHeaders(), $expected);
     }
@@ -126,5 +122,12 @@ class MezzioTestEnvironmentTest extends TestCase
         $this->expectExceptionMessage('I have an error');
 
         $this->mezzio->dispatch('/error');
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $basePath = dirname(__DIR__);
+        $this->mezzio = new MezzioTestEnvironment($basePath);
     }
 }

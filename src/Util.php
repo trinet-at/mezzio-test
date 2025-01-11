@@ -9,6 +9,7 @@ use UnexpectedValueException;
 
 use function dirname;
 use function file_exists;
+use function realpath;
 use function strlen;
 use function trim;
 
@@ -16,13 +17,13 @@ final class Util
 {
     public static function basePath(): string
     {
-        $path = \Safe\realpath(dirname(__DIR__));
-        if (file_exists($path . '/vendor')) {
+        $path = realpath(dirname(__DIR__));
+        if ($path !== false && file_exists($path . '/vendor')) {
             return self::ensureTrailingSlash($path);
         }
         // @codeCoverageIgnoreStart
-        $path = \Safe\realpath(dirname(__DIR__, 4));
-        if (file_exists($path . '/vendor')) {
+        $path = realpath(dirname(__DIR__, 4));
+        if ($path !== false && file_exists($path . '/vendor')) {
             return self::ensureTrailingSlash($path);
         }
         throw new RuntimeException('Could not find base path.');

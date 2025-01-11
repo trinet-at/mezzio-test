@@ -7,27 +7,30 @@ jobs:
 
     strategy:
       matrix:
-        php: ["7.4", "8.0", "8.1"]
+        php: ["8.2", "8.3"]
         composer_args:
           - '--prefer-lowest'
           - ''
 
     runs-on: ubuntu-latest
-    container:
-      image: eventjet/checks-${{ matrix.php }}:latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: pcov
+          tools: composer:v2
 
       - name: Prepare environment
         run: |
-          mkdir -p /root/.ssh
-          ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
           echo "COMPOSER_CACHE=$(composer config cache-dir)" >> $GITHUB_ENV
 
       - name: Composer Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ env.COMPOSER_CACHE }}
@@ -38,12 +41,17 @@ jobs:
         run: |
           composer update --no-progress --no-interaction ${{ matrix.composer_args }} > /dev/null
 
-      - name: Static analysis
-        run: |
-          composer check-deps
-          composer cs-check
-          composer phpstan -- --no-progress
-          composer psalm
+      - name: Check Dependencies
+        run: composer check-deps
+
+      - name: Check Code Style
+        run: PHP_CS_FIXER_IGNORE_ENV=1 composer cs-check
+
+      - name: PHPStan
+        run: composer phpstan -- --no-progress
+
+      - name: Psalm
+        run: composer psalm
 
       - name: Tests
         run: |
@@ -51,10 +59,10 @@ jobs:
           composer run --timeout=0 infection
 
       - name: Save Infection result
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: infection-log-${{ matrix.php }}.txt
+          name: infection-log-${{ matrix.php }}-${{ matrix.composer_args }}.txt
           path: infection-log.txt
 
       - name: Monitor coverage

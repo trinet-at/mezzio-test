@@ -11,13 +11,13 @@ return static function (Application $app): void {
         static function (): TextResponse {
             return new TextResponse('Hi');
         },
-        'home'
+        'home',
     );
     $app->get(
         '/error',
         static function (): void {
             throw new LogicException('I have an error');
         },
-        'error'
+        'error',
     );
 };
