@@ -7,11 +7,13 @@ namespace Trinet\Test\Functional\MezzioTest;
 use PHPUnit\Framework\TestCase;
 use Trinet\MezzioTest\TestConfigProvider;
 
+use function putenv;
+
 class TestConfigProviderTest extends TestCase
 {
     public function testReturnsEmptyArrayWhenNotInTestingEnvironment(): void
     {
-        \Safe\putenv('APP_TESTING');
+        putenv('APP_TESTING');
 
         $result = TestConfigProvider::load();
 
@@ -20,7 +22,7 @@ class TestConfigProviderTest extends TestCase
 
     public function testAdditionalFileProvidersAreReturnedWhenTesting(): void
     {
-        \Safe\putenv('APP_TESTING=true');
+        putenv('APP_TESTING=true');
 
         $result = TestConfigProvider::load();
 
@@ -29,7 +31,7 @@ class TestConfigProviderTest extends TestCase
 
     public function testCustomConfigPath(): void
     {
-        \Safe\putenv('APP_TESTING=true');
+        putenv('APP_TESTING=true');
         $path = 'my/special/config';
         $result = TestConfigProvider::load($path);
 

@@ -15,10 +15,7 @@ final class ReflectionUtil
     public static function getReflectionProperty(object $object, string $property)
     {
         $reflectionProperty = (new ReflectionObject($object))->getProperty($property);
-        $reflectionProperty->setAccessible(true);
-        $value = $reflectionProperty->getValue($object);
-        $reflectionProperty->setAccessible(false);
-        return $value;
+        return $reflectionProperty->getValue($object);
     }
 
     /**
@@ -28,8 +25,6 @@ final class ReflectionUtil
     public static function setReflectionProperty(object $object, string $property, $value): void
     {
         $reflectionProperty = (new ReflectionObject($object))->getProperty($property);
-        $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($object, $value);
-        $reflectionProperty->setAccessible(false);
     }
 }

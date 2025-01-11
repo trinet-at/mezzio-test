@@ -4,7 +4,6 @@
     bootstrap="vendor/autoload.php"
     beStrictAboutChangesToGlobalState="true"
     beStrictAboutOutputDuringTests="true"
-    verbose="true"
 >
     <testsuites>
         <testsuite name="Trinet\MezzioTest\Unit">
@@ -14,9 +13,9 @@
             <directory>tests/functional</directory>
         </testsuite>
     </testsuites>
-    <coverage>
+    <source>
         <include>
             <directory>src</directory>
         </include>
-    </coverage>
+    </source>
 </phpunit>
