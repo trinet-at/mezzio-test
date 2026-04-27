@@ -10,7 +10,7 @@ use UnexpectedValueException;
 
 use function dirname;
 
-class UtilTest extends TestCase
+final class UtilTest extends TestCase
 {
     public function testBasePath(): void
     {

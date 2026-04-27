@@ -9,7 +9,7 @@ use Trinet\MezzioTest\TestConfigProvider;
 
 use function putenv;
 
-class TestConfigProviderTest extends TestCase
+final class TestConfigProviderTest extends TestCase
 {
     public function testReturnsEmptyArrayWhenNotInTestingEnvironment(): void
     {

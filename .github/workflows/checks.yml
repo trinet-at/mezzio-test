@@ -7,16 +7,15 @@ jobs:
 
     strategy:
       matrix:
-        php: ["8.2", "8.3"]
+        php: ["8.2", "8.3", "8.4"]
         composer_args:
-          - '--prefer-lowest'
           - ''
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -30,7 +29,7 @@ jobs:
           echo "COMPOSER_CACHE=$(composer config cache-dir)" >> $GITHUB_ENV
 
       - name: Composer Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ env.COMPOSER_CACHE }}
@@ -59,7 +58,7 @@ jobs:
           composer run --timeout=0 infection
 
       - name: Save Infection result
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: infection-log-${{ matrix.php }}-${{ matrix.composer_args }}.txt
