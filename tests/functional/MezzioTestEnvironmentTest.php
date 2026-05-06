@@ -10,13 +10,14 @@ use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequest;
 use LogicException;
 use Mezzio\Application;
+use Override;
 use PHPUnit\Framework\TestCase;
 use Trinet\MezzioTest\MezzioTestEnvironment;
 use Trinet\Test\Functional\MezzioTest\TestDouble\RequestLoggerCallback;
 
 use function dirname;
 
-class MezzioTestEnvironmentTest extends TestCase
+final class MezzioTestEnvironmentTest extends TestCase
 {
     private MezzioTestEnvironment $mezzio;
 
@@ -124,6 +125,7 @@ class MezzioTestEnvironmentTest extends TestCase
         $this->mezzio->dispatch('/error');
     }
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
