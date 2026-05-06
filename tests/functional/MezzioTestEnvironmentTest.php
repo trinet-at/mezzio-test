@@ -66,6 +66,38 @@ final class MezzioTestEnvironmentTest extends TestCase
         self::assertTrue($config['testing']);
     }
 
+    public function testAppIsNotInitializedOnConstructAndContainerAccess(): void
+    {
+        $before = ReflectionUtil::getReflectionProperty($this->mezzio, 'app');
+
+        $this->mezzio->container();
+
+        self::assertNull($before);
+        self::assertNull(ReflectionUtil::getReflectionProperty($this->mezzio, 'app'));
+    }
+
+    public function testAppIsInitializedWhenRouterIsAccessed(): void
+    {
+        $before = ReflectionUtil::getReflectionProperty($this->mezzio, 'app');
+
+        $this->mezzio->router();
+
+        self::assertNull($before);
+        $after = ReflectionUtil::getReflectionProperty($this->mezzio, 'app');
+        self::assertInstanceOf(Application::class, $after);
+    }
+
+    public function testAppIsInitializedWhenDispatchIsCalled(): void
+    {
+        $before = ReflectionUtil::getReflectionProperty($this->mezzio, 'app');
+
+        $this->mezzio->dispatch('/');
+
+        self::assertNull($before);
+        $after = ReflectionUtil::getReflectionProperty($this->mezzio, 'app');
+        self::assertInstanceOf(Application::class, $after);
+    }
+
     public function testDispatchParamsArePassedToQueryForGetRequest(): void
     {
         $appMock = $this->createMock(Application::class);
