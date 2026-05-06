@@ -36,7 +36,6 @@ final class MezzioTestEnvironment
         $this->basePath = $basePath ?? Util::basePath();
         $this->basePath = Util::ensureTrailingSlash($this->basePath);
         chdir($this->basePath);
-        $this->app();   // initialize App for routes to be populated
         $this->registerErrorListener();
     }
 
@@ -113,6 +112,7 @@ final class MezzioTestEnvironment
 
     public function router(): RouterInterface
     {
+        $this->app(); // initialize App for routes to be populated
         return $this->container()->get(RouterInterface::class);
     }
 
